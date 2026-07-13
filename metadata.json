@@ -1,0 +1,8 @@
+{
+  "name": "Remix: TapTile",
+  "description": "Pakistan’s first digital receipt infrastructure for paperless retail receipts, NFC taps, QR fallback, and POS-friendly integration.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
