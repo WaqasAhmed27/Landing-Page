@@ -1,9 +1,15 @@
-import { useState, useRef, useEffect, RefObject } from "react";
+import { useState, useRef, RefObject } from "react";
 import { Check, Menu, X, Plus, Droplet, Recycle, Trees, ArrowRight, Smartphone, Nfc, QrCodeIcon } from "lucide-react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
 import originalLogo from "./assets/images/taptile_logo_original.png";
 import neobrutalistLogo from "./assets/images/taptile_logo_neobrutalist.png";
 import TrailCanvas from "./components/TrailCanvas";
+import BrutalButton from "./components/BrutalButton";
+import PageLoader from "./components/PageLoader";
 
+gsap.registerPlugin(ScrollTrigger);
 import imgGlasses from "./assets/images/trail_images/chameleon_glasses.png";
 import imgTongue from "./assets/images/trail_images/chameleon_tongue.png";
 import imgWink from "./assets/images/trail_images/chameleon_wink.png";
@@ -25,8 +31,7 @@ export default function App() {
   const [faqOpen, setFaqOpen] = useState<number | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [useOriginalLogo, setUseOriginalLogo] = useState(false);
-  const [activeSegment, setActiveSegment] = useState<'retailers' | 'customers'>('retailers');
-  const [logoClicks, setLogoClicks] = useState(0);
+const [logoClicks, setLogoClicks] = useState(0);
   const [trailEnabled, setTrailEnabled] = useState(false);
   const [activeHowItWorks, setActiveHowItWorks] = useState([true, false, false, false]);
   
@@ -44,146 +49,280 @@ export default function App() {
   const footerRef = useRef<HTMLDivElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    let rAFId: number | null = null;
-    let isThrottled = false;
-    let wasMobile = false;
+  const appRef = useRef<HTMLDivElement>(null);
+  const blobRef = useRef<HTMLDivElement>(null);
+  const blobEffectRef = useRef<HTMLDivElement>(null);
 
-    const applyStyles = (cardRef: RefObject<HTMLDivElement>, numRef: RefObject<HTMLHeadingElement> | null, progress: number, maxVal: number, unit: string, format: (val: number) => string, baseTransform = '') => {
-      if (cardRef.current) {
-        cardRef.current.style.opacity = progress.toString();
-        cardRef.current.style.transform = `translateY(${60 * (1 - progress)}px) scale(${0.92 + 0.08 * progress}) rotate(${-8 * (1 - progress)}deg) ${baseTransform}`;
-      }
-      if (numRef && numRef.current) {
-        numRef.current.textContent = format(progress * maxVal) + unit;
-      }
-    };
-
-    const clearStyles = (cardRef: RefObject<HTMLDivElement>, numRef: RefObject<HTMLHeadingElement> | null, maxVal: number, unit: string, format: (val: number) => string) => {
-      if (cardRef.current) {
-        cardRef.current.style.opacity = '1';
-        cardRef.current.style.transform = 'none';
-      }
-      if (numRef && numRef.current) {
-        numRef.current.textContent = format(maxVal) + unit;
-      }
-    };
-
-    const handleScroll = () => {
-      if (isThrottled) return;
-      isThrottled = true;
-
-      rAFId = requestAnimationFrame(() => {
-        const isMobile = window.innerWidth < 768;
-
-        if (isMobile) {
-          if (!wasMobile) {
-            clearStyles(card1Ref, num1Ref, 41.5, 'B', v => v.toFixed(1));
-            clearStyles(card2Ref, num2Ref, 90, '%', v => Math.round(v).toString());
-            clearStyles(card3Ref, num3Ref, 12.4, 'M', v => v.toFixed(1));
-            clearStyles(footerRef, null, 0, '', () => '');
-            if (progressBarRef.current) progressBarRef.current.style.width = '0%';
-            wasMobile = true;
-          }
-        } else {
-          wasMobile = false;
-          if (stickyContainerRef.current) {
-            const rect = stickyContainerRef.current.getBoundingClientRect();
-            const scrolled = -rect.top;
-            const totalScrollable = rect.height - window.innerHeight;
-            let progress = 0;
-            if (totalScrollable > 0) {
-              progress = Math.max(0, Math.min(1, scrolled / totalScrollable));
-            }
-
-            if (progressBarRef.current) {
-              progressBarRef.current.style.width = `${progress * 100}%`;
-              progressBarRef.current.style.opacity = (progress > 0 && progress < 1) ? '1' : '0';
-            }
-
-            const getCardProgress = (p: number, s: number, e: number) => {
-              if (p < s) return 0;
-              if (p > e) return 1;
-              return (p - s) / (e - s);
-            };
-
-            const c1 = getCardProgress(progress, 0.2, 0.3);
-            const c2 = getCardProgress(progress, 0.45, 0.55);
-            const c3 = getCardProgress(progress, 0.7, 0.8);
-            const f1 = getCardProgress(progress, 0.85, 0.95);
-
-            applyStyles(card1Ref, num1Ref, c1, 41.5, 'B', v => v.toFixed(1));
-            applyStyles(card2Ref, num2Ref, c2, 90, '%', v => Math.round(v).toString());
-            applyStyles(card3Ref, num3Ref, c3, 12.4, 'M', v => v.toFixed(1));
-            
-            if (footerRef.current) {
-               footerRef.current.style.opacity = f1.toString();
-               footerRef.current.style.transform = `translateY(${60 * (1 - f1)}px) scale(${0.92 + 0.08 * f1})`;
-            }
+  useGSAP(() => {
+    // 1. Progress Bar (Desktop only)
+    gsap.to(progressBarRef.current, {
+      width: "100%",
+      ease: "none",
+      scrollTrigger: {
+        trigger: stickyContainerRef.current,
+        start: "top top",
+        end: "bottom bottom",
+        scrub: true,
+        onUpdate: (self) => {
+          if (progressBarRef.current) {
+            progressBarRef.current.style.opacity = (self.progress > 0 && self.progress < 1) ? '1' : '0';
           }
         }
+      }
+    });
 
-        if (rightStripMaskRef.current) {
-          const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-          if (docHeight > 0) {
-            const ratio = Math.max(0, Math.min(1, window.scrollY / docHeight));
-            rightStripMaskRef.current.style.height = `${ratio * 100}%`;
-          }
+    // 2. Right Strip Mask
+    gsap.to(rightStripMaskRef.current, {
+      height: "100%",
+      ease: "none",
+      scrollTrigger: {
+        trigger: document.body,
+        start: "top top",
+        end: "bottom bottom",
+        scrub: true
+      }
+    });
+
+    // 3. Problem with Paper Cards (Desktop)
+    const mm = gsap.matchMedia();
+    mm.add("(min-width: 768px)", () => {
+      const elements = [card1Ref.current, card2Ref.current, card3Ref.current, footerRef.current];
+      const nums = [
+        { ref: num1Ref, val: 41.5, unit: 'B', fmt: (v: number) => v.toFixed(1) },
+        { ref: num2Ref, val: 90, unit: '%', fmt: (v: number) => Math.round(v).toString() },
+        { ref: num3Ref, val: 12.4, unit: 'M', fmt: (v: number) => v.toFixed(1) }
+      ];
+
+      // Initial state
+      elements.forEach((el, index) => {
+        if (el) gsap.set(el, { opacity: 0, y: 60, scale: 0.92, rotation: index < 3 ? -8 : 0 });
+      });
+
+      // Unified timeline for the entire pinned section
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: stickyContainerRef.current,
+          start: "top top",
+          end: "bottom bottom",
+          scrub: 1, // Smooth scrubbing
         }
+      });
 
-        if (pillRefs.current.length > 0) {
-          const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-          if (docHeight > 0) {
-            const scrollProgress = window.scrollY / docHeight;
-            pillRefs.current.forEach((pill, index) => {
-              if (!pill) return;
-              const phase = (index / pillRefs.current.length) * Math.PI * 2;
-              const wave = Math.sin((scrollProgress * Math.PI * 4) + phase);
-              const baseX = index % 2 === 0 ? 20 : -20;
-              const xOffset = baseX + wave * 24;
-              pill.style.transform = `translateX(${xOffset}px) rotate(${wave * 3}deg)`;
-              
-              const shadowX = wave > 0 ? 2 : -2;
-              const pillBox = pill.querySelector('.pill-box') as HTMLElement;
-              if (pillBox) {
-                 pillBox.style.boxShadow = `${shadowX}px 2px 0px 0px #111111`;
+      // Add a small initial gap before the first card appears
+      tl.to({}, { duration: 0.2 });
+
+      elements.forEach((el, index) => {
+        if (!el) return;
+
+        // Animate the card in
+        tl.to(el, {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          rotation: 0,
+          duration: 1,
+          ease: "power2.out"
+        });
+
+        // Animate the number concurrently
+        if (index < 3) {
+          const nObj = nums[index];
+          tl.to({ val: 0 }, {
+            val: nObj.val,
+            duration: 1,
+            ease: "none",
+            onUpdate: function() {
+              if (nObj.ref.current) {
+                nObj.ref.current.textContent = nObj.fmt(this.targets()[0].val) + nObj.unit;
               }
-            });
-          }
+            }
+          }, "<");
         }
 
-        if (howItWorksRef.current) {
-          const rect = howItWorksRef.current.getBoundingClientRect();
-          // How much of the section is visible from the bottom of the viewport
-          const scrolledIntoView = window.innerHeight - rect.top;
-          const ratio = Math.max(0, scrolledIntoView / rect.height);
-          setActiveHowItWorks(prev => {
-            const next = [
-              true,
-              ratio >= 0.3,
-              ratio >= 0.55,
-              ratio >= 0.8
-            ];
-            const changed = next.some((val, i) => val !== prev[i]);
-            return changed ? next : prev;
+        // Add a delay/gap before the next card starts animating
+        tl.to({}, { duration: 0.4 });
+      });
+    });
+    
+    mm.add("(max-width: 767px)", () => {
+       const elements = [card1Ref.current, card2Ref.current, card3Ref.current, footerRef.current];
+       elements.forEach(el => el && gsap.set(el, { clearProps: "all" }));
+       if (num1Ref.current) num1Ref.current.textContent = '41.5B';
+       if (num2Ref.current) num2Ref.current.textContent = '90%';
+       if (num3Ref.current) num3Ref.current.textContent = '12.4M';
+    });
+
+    // 4. How It Works Snap
+    const cards = gsap.utils.toArray('.hiw-card', howItWorksRef.current) as HTMLElement[];
+    
+    // Set initial inactive state for ALL cards so they slide up
+    gsap.set(cards, {
+      filter: "grayscale(70%)",
+      opacity: 0,
+      boxShadow: "none",
+      scale: 0.90,
+      y: 60
+    });
+
+    ScrollTrigger.create({
+      trigger: howItWorksRef.current,
+      start: "top 60%",
+      onEnter: () => {
+        gsap.to(cards, {
+          y: 0,
+          filter: "grayscale(0%)",
+          opacity: 1,
+          boxShadow: "5px 5px 0px #111111",
+          scale: 1,
+          duration: 0.6,
+          stagger: 0.15,
+          ease: "back.out(1.5)"
+        });
+      }
+    });
+    
+    cards.forEach((card) => {
+      
+      // Add brutalist hover effect
+      card.addEventListener('mouseenter', () => {
+        // Only apply if it's currently 'active' (opacity 1)
+        if (gsap.getProperty(card, "opacity") === 1) {
+          gsap.to(card, {
+            y: -8,
+            boxShadow: "12px 20px 0px 0px #111111",
+            duration: 0.2,
+            ease: "power2.out"
           });
         }
-
-        isThrottled = false;
       });
-    };
+      
+      card.addEventListener('mouseleave', () => {
+        if (gsap.getProperty(card, "opacity") === 1) {
+          gsap.to(card, {
+            y: 0,
+            boxShadow: "5px 5px 0px #111111",
+            duration: 0.2,
+            ease: "power2.in"
+          });
+        }
+      });
+    });
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    window.addEventListener('resize', handleScroll, { passive: true });
-    // Initialize
-    handleScroll();
+    // 6. Sticker Badges Continuous Wiggle
+    const badges = gsap.utils.toArray('.absolute.object-contain.pointer-events-none.drop-shadow-md');
+    badges.forEach((badge: any, index: number) => {
+      gsap.to(badge, {
+        rotation: "random(-15, 15)",
+        x: "random(-10, 10)",
+        y: "random(-10, 10)",
+        duration: "random(2, 4)",
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+        delay: index * 0.2
+      });
+    });
 
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', handleScroll);
-      if (rAFId) cancelAnimationFrame(rAFId);
-    };
-  }, []);
+    // 7. Cursor Blob Follower & Liquid Deformation
+    const blob = blobRef.current;
+    const blobEffect = blobEffectRef.current;
+    if (blob && blobEffect && window.matchMedia("(min-width: 768px)").matches) {
+      const xTo = gsap.quickTo(blob, "left", { duration: 0.4, ease: "power3" });
+      const yTo = gsap.quickTo(blob, "top", { duration: 0.4, ease: "power3" });
+
+      const xToEffect = gsap.quickTo(blobEffect, "left", { duration: 0.7, ease: "power3" });
+      const yToEffect = gsap.quickTo(blobEffect, "top", { duration: 0.7, ease: "power3" });
+
+      const mouse = { x: 0, y: 0 };
+      const prevMouse = { x: 0, y: 0 };
+      let currentSpeed = 0;
+      let currentAngle = 0;
+
+      const onMouseMove = (e: MouseEvent) => {
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+      };
+
+      window.addEventListener("mousemove", onMouseMove);
+
+      const updateBlob = () => {
+        if (prevMouse.x === 0 && prevMouse.y === 0) {
+          prevMouse.x = mouse.x;
+          prevMouse.y = mouse.y;
+          return;
+        }
+
+        const dx = mouse.x - prevMouse.x;
+        const dy = mouse.y - prevMouse.y;
+
+        const targetSpeed = Math.min(Math.sqrt(dx * dx + dy * dy) * 0.08, 0.8);
+        const targetAngle = Math.atan2(dy, dx) * (180 / Math.PI);
+
+        // Smooth speed decay
+        currentSpeed += (targetSpeed - currentSpeed) * 0.15;
+        
+        // Only update angle if moving to avoid snapping back to 0 when stopping
+        if (Math.sqrt(dx * dx + dy * dy) > 1) {
+          currentAngle = targetAngle;
+        }
+
+        xTo(mouse.x - 24);
+        yTo(mouse.y - 24);
+
+        xToEffect(mouse.x - 20);
+        yToEffect(mouse.y - 20);
+
+        gsap.set(blob, {
+          scaleX: 1 + currentSpeed * 0.3,
+          scaleY: 1 - currentSpeed * 0.15,
+          rotation: currentAngle
+        });
+
+        gsap.set(blobEffect, {
+          scaleX: 1 + currentSpeed * 0.4,
+          scaleY: 1 - currentSpeed * 0.2,
+          rotation: currentAngle
+        });
+
+        prevMouse.x = mouse.x;
+        prevMouse.y = mouse.y;
+      };
+
+      gsap.ticker.add(updateBlob);
+
+      const generateBlobString = () => {
+        const r = () => gsap.utils.random(42, 58, 1);
+        return `${r()}% ${r()}% ${r()}% ${r()}% / ${r()}% ${r()}% ${r()}% ${r()}%`;
+      };
+
+      const animateBlob = () => {
+        gsap.to(blob, {
+          borderRadius: generateBlobString(),
+          duration: 1.2,
+          ease: "sine.inOut",
+          onComplete: animateBlob
+        });
+      };
+
+      const animateBlobEffect = () => {
+        gsap.to(blobEffect, {
+          borderRadius: generateBlobString(),
+          duration: 1.4,
+          ease: "sine.inOut",
+          onComplete: animateBlobEffect
+        });
+      };
+
+      animateBlob();
+      animateBlobEffect();
+
+      return () => {
+        window.removeEventListener("mousemove", onMouseMove);
+        gsap.ticker.remove(updateBlob);
+      };
+    }
+
+  }, { scope: appRef });
 
   const handleLogoClick = () => {
     setUseOriginalLogo(!useOriginalLogo);
@@ -201,98 +340,41 @@ export default function App() {
   const expenses = Math.round(calcVolume * 18.25).toLocaleString();
 
   const faqs = [
-    { q: "Does this require changes to our POS software?", a: "No. TapTile's middleware intercepts print jobs in parallel, requiring zero changes to your billing software." },
-    { q: "Do customers need to install an app?", a: "No app required. The receipt opens instantly in their native mobile browser via NFC or QR code." },
-    { q: "What happens if internet is down at the counter?", a: "The TapTile counter device works fully offline. It caches receipts locally and syncs them once the connection is restored." },
-    { q: "How fast can a store go live?", a: "Integration is plug-and-play. A store can go fully live in under 48 hours with no operational downtime." },
-    { q: "Can TapTile still print paper receipts?", a: "Yes. TapTile runs alongside your thermal printer, allowing you to print paper on demand for customers who request it." },
+    { q: "Does this require changes to our POS software?", a: "No. TapTile installs alongside your current system — your printer keeps working exactly as before. Our middleware intercepts the print job in parallel without touching your billing software. If TapTile ever goes offline, your paper receipts continue uninterrupted. Zero risk to your operations." },
+    { q: "Do customers need to install an app?", a: "No app, no account, no signup. The receipt opens instantly in their native mobile browser the moment they tap or scan. Customers with any NFC-enabled phone — Android or iPhone — can use it out of the box. No friction for you, no friction for them." },
+    { q: "What happens if internet is down at the counter?", a: "The TapTile counter device works fully offline. Customers can still tap or scan and receive their receipt instantly. The device caches all receipts locally and automatically syncs to the cloud the moment connectivity is restored. Your counter never stalls." },
+    { q: "How fast can a store go live?", a: "Most stores are fully live in under 48 hours. We handle the setup remotely — no store downtime, no technician visit required for most POS setups. You tell us your billing software; we handle the rest." },
+    { q: "Can TapTile still print paper receipts?", a: "Yes, always. TapTile runs alongside your thermal printer — paper receipts print exactly as before. You can go fully paperless, hybrid, or keep paper as the default. You're in control, and the switch is instant." },
   ];
 
   const getCardClasses = (isActive: boolean, baseBg: string, textClass: string = "text-black") => {
-    return `hiw-card relative ${baseBg} border-4 border-black rounded-2xl sm:rounded-[2rem] p-5 sm:p-8 ${isActive ? 'hiw-card-active' : 'hiw-card-inactive'} ${textClass}`;
+    return `hiw-card relative ${baseBg} border-4 border-black rounded-3xl p-4 sm:p-6 xl:p-8 ${isActive ? 'hiw-card-active' : 'hiw-card-inactive'} ${textClass}`;
   };
 
   return (
-    <div className="min-h-screen bg-white text-[#111111] font-sans selection:bg-[#4ADE80] selection:text-black overflow-x-clip">
+    <div ref={appRef} className="min-h-screen bg-white text-[#111111] font-sans selection:bg-[#4ADE80] selection:text-black overflow-x-clip">
+      <PageLoader />
       
-      {/* LEFT STRIP - SNAKE PILLS */}
-      {trailEnabled && (
-        <div 
-          className="fixed left-0 top-0 h-screen hidden xl:flex justify-center pointer-events-none z-[999] overflow-visible"
-          style={{ width: 'max(280px, calc((100vw - 70.625rem) / 2))' }}
-        >
-          <div className="w-full h-full flex flex-col items-center justify-evenly py-10">
-              <div className="translate-x-[20px]" ref={(el) => { pillRefs.current[0] = el; }}>
-                <div className="relative animate-pill-1 opacity-0">
-                 <img src={imgLightning} alt="" className="absolute -top-6 -left-6 w-12 h-12 -rotate-12 object-contain pointer-events-none drop-shadow-md z-10" />
-                 <div className="pill-box bg-white border-[2px] border-[#111111] shadow-[2px_2px_0px_0px_#111111] rounded-full px-4 py-1.5 font-sans font-[700] text-[11px] text-[#111111] whitespace-nowrap">
-                   ⚡ Under 2 seconds
-                 </div>
-                </div>
-              </div>
-              <div className="-translate-x-[20px]" ref={(el) => { pillRefs.current[1] = el; }}>
-                <div className="relative animate-pill-2 opacity-0">
-                 <img src={imgWink} alt="" className="absolute -bottom-5 -right-4 w-12 h-12 rotate-12 object-contain pointer-events-none drop-shadow-md z-10" />
-                 <div className="pill-box bg-white border-[2px] border-[#111111] shadow-[2px_2px_0px_0px_#111111] rounded-full px-4 py-1.5 font-sans font-[700] text-[11px] text-[#111111] whitespace-nowrap">
-                   📵 No app needed
-                 </div>
-                </div>
-              </div>
-              <div className="translate-x-[20px]" ref={(el) => { pillRefs.current[2] = el; }}>
-                <div className="relative animate-pill-3 opacity-0">
-                 <img src={imgCheckmark} alt="" className="absolute -top-4 -right-5 w-10 h-10 rotate-6 object-contain pointer-events-none drop-shadow-md z-10" />
-                 <div className="pill-box bg-white border-[2px] border-[#111111] shadow-[2px_2px_0px_0px_#111111] rounded-full px-4 py-1.5 font-sans font-[700] text-[11px] text-[#111111] whitespace-nowrap">
-                   ✓ FBR compliant
-                 </div>
-                </div>
-              </div>
-              <div className="-translate-x-[20px]" ref={(el) => { pillRefs.current[3] = el; }}>
-                <div className="relative animate-pill-4 opacity-0">
-                 <img src={imgTongue} alt="" className="absolute -bottom-6 -left-5 w-14 h-14 -rotate-6 object-contain pointer-events-none drop-shadow-md z-10" />
-                 <div className="pill-box bg-white border-[2px] border-[#111111] shadow-[2px_2px_0px_0px_#111111] rounded-full px-4 py-1.5 font-sans font-[700] text-[11px] text-[#111111] whitespace-nowrap">
-                   🌿 100% paperless
-                 </div>
-                </div>
-              </div>
-              <div className="translate-x-[20px]" ref={(el) => { pillRefs.current[4] = el; }}>
-                <div className="relative animate-pill-5 opacity-0">
-                 <img src={imgGlasses} alt="" className="absolute -top-5 left-10 w-12 h-12 rotate-[15deg] object-contain pointer-events-none drop-shadow-md z-10" />
-                 <div className="pill-box bg-white border-[2px] border-[#111111] shadow-[2px_2px_0px_0px_#111111] rounded-full px-4 py-1.5 font-sans font-[700] text-[11px] text-[#111111] whitespace-nowrap">
-                   🔒 End-to-end encrypted
-                 </div>
-                </div>
-              </div>
-              <div className="-translate-x-[20px]" ref={(el) => { pillRefs.current[5] = el; }}>
-                <div className="relative animate-pill-6 opacity-0">
-                 <img src={imgCoin} alt="" className="absolute -bottom-5 -right-3 w-10 h-10 -rotate-12 object-contain pointer-events-none drop-shadow-md z-10" />
-                 <div className="pill-box bg-white border-[2px] border-[#111111] shadow-[2px_2px_0px_0px_#111111] rounded-full px-4 py-1.5 font-sans font-[700] text-[11px] text-[#111111] whitespace-nowrap">
-                   0 POS changes
-                 </div>
-                </div>
-              </div>
-              <div className="translate-x-[20px]" ref={(el) => { pillRefs.current[6] = el; }}>
-                <div className="relative animate-pill-7 opacity-0">
-                 <img src={imgSpark} alt="" className="absolute -top-5 -left-4 w-10 h-10 -rotate-[20deg] object-contain pointer-events-none drop-shadow-md z-10" />
-                 <img src={imgConfetti} alt="" className="absolute -bottom-6 -right-6 w-12 h-12 rotate-[25deg] object-contain pointer-events-none drop-shadow-md z-10" />
-                 <div className="pill-box bg-white border-[2px] border-[#111111] shadow-[2px_2px_0px_0px_#111111] rounded-full px-4 py-1.5 font-sans font-[700] text-[11px] text-[#111111] whitespace-nowrap">
-                   📍 Made in Pakistan
-                 </div>
-                </div>
-              </div>
+      {/* RIGHT STRIP - SCROLL PROGRESS */}
+      <div 
+        className="fixed right-0 top-0 h-screen hidden xl:flex justify-center pointer-events-none z-0 bg-[#22C55E] overflow-hidden w-64"
+      >
+        <div className="absolute w-full h-[100vh] flex items-center justify-center">
+          <div 
+            className="w-[100vh] flex items-center text-[#111111] font-mono uppercase leading-[0.8] font-black opacity-[0.12] whitespace-nowrap"
+            style={{ transform: 'rotate(-90deg)', fontSize: '12rem' }}
+          >
+            <div className="animate-marquee flex">
+              <span className="pr-4">PAKISTAN'S FIRST DIGITAL RECEIPT INFRASTRUCTURE &middot;&nbsp;PAKISTAN'S FIRST DIGITAL RECEIPT INFRASTRUCTURE &middot;&nbsp;</span>
+              <span className="pr-4">PAKISTAN'S FIRST DIGITAL RECEIPT INFRASTRUCTURE &middot;&nbsp;PAKISTAN'S FIRST DIGITAL RECEIPT INFRASTRUCTURE &middot;&nbsp;</span>
+            </div>
           </div>
         </div>
-      )}
-
-      {/* RIGHT STRIP - SCROLL PROGRESS */}
-      {trailEnabled && (
-        <div 
-          className="fixed right-0 top-0 h-screen hidden xl:flex justify-center pointer-events-none z-0 bg-[#22C55E] overflow-hidden"
-          style={{ width: 'calc((100vw - 70.625rem) / 2)' }}
-        >
-          <div className="absolute w-full h-[100vh] flex items-center justify-center">
+        <div ref={rightStripMaskRef} className="absolute bottom-0 w-full overflow-hidden flex justify-center" style={{ height: '0%' }}>
+          <div className="absolute bottom-0 w-full h-[100vh] flex items-center justify-center">
             <div 
-              className="w-[100vh] flex items-center text-[#111111] font-mono uppercase leading-[0.8] font-black opacity-[0.12] whitespace-nowrap"
-              style={{ transform: 'rotate(-90deg)', fontSize: 'calc(((100vw - 70.625rem) / 2) * 0.8)' }}
+              className="w-[100vh] flex items-center text-[#111111] font-mono uppercase leading-[0.8] font-black opacity-100 whitespace-nowrap"
+              style={{ transform: 'rotate(-90deg)', fontSize: '12rem' }}
             >
               <div className="animate-marquee flex">
                 <span className="pr-4">PAKISTAN'S FIRST DIGITAL RECEIPT INFRASTRUCTURE &middot;&nbsp;PAKISTAN'S FIRST DIGITAL RECEIPT INFRASTRUCTURE &middot;&nbsp;</span>
@@ -300,21 +382,8 @@ export default function App() {
               </div>
             </div>
           </div>
-          <div ref={rightStripMaskRef} className="absolute bottom-0 w-full overflow-hidden flex justify-center" style={{ height: '0%' }}>
-            <div className="absolute bottom-0 w-full h-[100vh] flex items-center justify-center">
-              <div 
-                className="w-[100vh] flex items-center text-[#111111] font-mono uppercase leading-[0.8] font-black opacity-100 whitespace-nowrap"
-                style={{ transform: 'rotate(-90deg)', fontSize: 'calc(((100vw - 70.625rem) / 2) * 0.8)' }}
-              >
-                <div className="animate-marquee flex">
-                  <span className="pr-4">PAKISTAN'S FIRST DIGITAL RECEIPT INFRASTRUCTURE &middot;&nbsp;PAKISTAN'S FIRST DIGITAL RECEIPT INFRASTRUCTURE &middot;&nbsp;</span>
-                  <span className="pr-4">PAKISTAN'S FIRST DIGITAL RECEIPT INFRASTRUCTURE &middot;&nbsp;PAKISTAN'S FIRST DIGITAL RECEIPT INFRASTRUCTURE &middot;&nbsp;</span>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
-      )}
+      </div>
 
       {/* Progress Bar (Desktop only) */}
       <div className="fixed top-0 left-0 w-full h-2.5 z-[99999] hidden md:block pointer-events-none">
@@ -322,11 +391,23 @@ export default function App() {
       </div>
       
       {trailEnabled && <TrailCanvas />}
-      <div className="max-w-[70.625rem] mx-auto border-x-4 border-black bg-[#FDFBEE] min-h-screen relative shadow-2xl">
+      <div className="w-full xl:max-w-[calc(100vw-16rem)] ml-0 border-r-4 border-black bg-[#FDFBEE] min-h-screen relative shadow-2xl md:cursor-none">
+        {/* Yellow Trailing Effect Blob */}
+        <div 
+          ref={blobEffectRef} 
+          className="hidden md:block fixed w-10 h-10 bg-[#FFF248] pointer-events-none mix-blend-difference z-[9998]"
+          style={{ left: '-100px', top: '-100px', borderRadius: '50%' }}
+        />
+        {/* Cursor Follower Blob */}
+        <div 
+          ref={blobRef} 
+          className="hidden md:block fixed w-12 h-12 bg-[#4ADE80] pointer-events-none mix-blend-difference z-[9999]"
+          style={{ left: '-100px', top: '-100px', borderRadius: '50%' }}
+        />
       
       {/* Navbar */}
       <nav className="sticky top-0 z-50 bg-[#FDFBEE] border-b-4 border-black">
-        <div className="max-w-[70.625rem] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 h-20 flex items-center justify-between">
+        <div className="max-w-[85rem] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 h-20 flex items-center justify-between">
           <div 
             className="flex items-center gap-3 cursor-pointer group"
             onClick={handleLogoClick}
@@ -359,9 +440,9 @@ export default function App() {
           </div>
           
           <div className="hidden md:block">
-            <button className="bg-[#4ADE80] border-2 border-black rounded-lg px-6 py-2.5 font-bold uppercase text-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all">
+            <BrutalButton className="bg-[#4ADE80] border-2 border-black rounded-lg px-6 py-2.5 font-bold uppercase text-sm" baseShadow="4px 4px 0px 0px rgba(0,0,0,1)">
               Book a Demo
-            </button>
+            </BrutalButton>
           </div>
 
           <button className="md:hidden" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
@@ -377,29 +458,35 @@ export default function App() {
           <a href="#integration" className="font-bold text-lg hover:text-[#4ADE80] transition-colors" onClick={() => setMobileMenuOpen(false)}>Integration</a>
           <a href="#security" className="font-bold text-lg hover:text-[#4ADE80] transition-colors" onClick={() => setMobileMenuOpen(false)}>Security</a>
           <a href="#pricing" className="font-bold text-lg hover:text-[#4ADE80] transition-colors" onClick={() => setMobileMenuOpen(false)}>Pricing</a>
-          <button className="mt-4 bg-[#4ADE80] border-2 border-black rounded-lg px-6 py-3 font-bold uppercase text-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+          <BrutalButton className="mt-4 bg-[#4ADE80] border-2 border-black rounded-lg px-6 py-3 font-bold uppercase text-sm" baseShadow="4px 4px 0px 0px rgba(0,0,0,1)">
             Book a Demo
-          </button>
+          </BrutalButton>
         </div>
       )}
 
 
       {/* Hero */}
-      <section className="relative pt-10 pb-8 md:pt-16 md:pb-12 px-4 sm:px-6 md:px-8 lg:px-12 max-w-[70.625rem] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+      <section className="relative pt-10 pb-8 md:pt-16 md:pb-12 px-4 sm:px-6 md:px-8 lg:px-12 max-w-[85rem] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+        <div className="absolute top-12 right-8 rotate-[8deg] z-20 xl:block hidden">
+      <img src={imgLightning} alt="" className="absolute -top-6 -left-6 w-12 h-12 -rotate-12 object-contain pointer-events-none drop-shadow-md z-10" />
+      <div className="pill-box bg-white border-[2px] border-[#111111] shadow-[2px_2px_0px_0px_#111111] rounded-full px-4 py-1.5 font-sans font-[700] text-[11px] text-[#111111] whitespace-nowrap">
+        ⚡ Under 2 seconds
+      </div>
+    </div>
         
         <div>
           <div className="inline-block bg-[#4ADE80] border-2 border-black px-3 py-1 rounded-full shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] font-bold text-xs uppercase tracking-wider mb-8">
             Pakistan's First Digital Receipt Experience
           </div>
           <h1 className="font-syne text-[2.25rem] sm:text-[3rem] lg:text-[3.5rem] font-extrabold leading-[1] tracking-tight mb-8 relative z-10">
-            Receipts,<br />
+            Digital receipts.<br />
             <span className="text-[#4ADE80] relative inline-block">
-              reimagined.
+              Zero POS changes.
               <div className="absolute -bottom-1 sm:-bottom-3 -left-4 sm:-left-6 w-[105%] sm:w-[110%] h-3 sm:h-4 bg-[#FFF248] border-[3px] border-black rounded-full -rotate-2 -z-10 hover:skew-x-6 hover:-rotate-1 transition-all duration-300"></div>
             </span>
           </h1>
           <p className="text-lg font-medium text-gray-700 mb-10 max-w-lg leading-relaxed">
-            No app. No POS changes. No workflow friction. One tap delivers a digital receipt to your customer in under two seconds.
+            One tap delivers a digital receipt to your customer in under two seconds — no app, no POS changes, no workflow friction. Live in under 48 hours.
           </p>
           
           <div className="flex flex-wrap gap-4 mb-12">
@@ -418,13 +505,14 @@ export default function App() {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-            <button className="w-full sm:w-auto bg-[#4ADE80] text-black font-bold px-4 py-2.5 text-sm rounded-md border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all uppercase text-sm tracking-wider">
-              Book a Demo
-            </button>
-            <button className="w-full sm:w-auto bg-white text-black font-bold px-4 py-2.5 text-sm rounded-md border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all uppercase text-sm tracking-wider">
-              Request Integration
-            </button>
+            <BrutalButton className="w-full sm:w-auto bg-[#4ADE80] text-black font-bold px-4 py-2.5 text-sm rounded-md border-2 border-black uppercase text-sm tracking-wider" baseShadow="4px 4px 0px 0px rgba(0,0,0,1)">
+              See It In Action
+            </BrutalButton>
+            <BrutalButton className="w-full sm:w-auto bg-white text-black font-bold px-4 py-2.5 text-sm rounded-md border-2 border-black uppercase text-sm tracking-wider" baseShadow="4px 4px 0px 0px rgba(0,0,0,1)">
+              Check POS Compatibility
+            </BrutalButton>
           </div>
+          <p className="mt-6 text-sm font-bold text-gray-500 uppercase tracking-wider">Trusted by retailers across Pakistan — Al-Fatah, Khaadi, Metro & more</p>
         </div>
 
         <div className="relative h-[300px] sm:h-[380px] w-full mt-4 sm:mt-12 lg:mt-0 flex justify-center items-center">
@@ -477,30 +565,41 @@ export default function App() {
       </section>
 
       {/* Marquee */}
-      <div className="w-full bg-black text-white py-2.5 sm:py-4 overflow-hidden border-y-4 border-black flex relative z-10">
-        <div className="animate-marquee whitespace-nowrap flex items-center font-mono text-xs sm:text-sm font-bold tracking-widest">
-          {Array(8).fill(0).map((_, i) => (
-            <span key={i} className="flex items-center">
-              <span className="mx-6">AL-FATAH SUPERMARKET</span><span className="text-[#4ADE80]">★</span>
-              <span className="mx-6">KHAADI</span><span className="text-[#4ADE80]">★</span>
-              <span className="mx-6">METRO CASH & CARRY</span><span className="text-[#4ADE80]">★</span>
-              <span className="mx-6">SAVOUR FOODS</span><span className="text-[#4ADE80]">★</span>
-              <span className="mx-6">IMTIAZ SUPER MARKET</span><span className="text-[#4ADE80]">★</span>
-              <span className="mx-6">CHASE UP</span><span className="text-[#4ADE80]">★</span>
-              <span className="mx-6">SANA SAFINAZ</span><span className="text-[#4ADE80]">★</span>
-              <span className="mx-6">CARREFOUR</span><span className="text-[#4ADE80]">★</span>
-              <span className="mx-6">LALA TEXTILE</span><span className="text-[#4ADE80]">★</span>
-            </span>
-          ))}
+      <div className="w-full bg-black text-white border-y-4 border-black flex flex-col relative z-10">
+        <div className="text-center py-2 font-bold text-[10px] uppercase tracking-[0.2em] text-gray-400 border-b-2 border-gray-800">
+          Pilot partners &amp; integrations
+        </div>
+        <div className="overflow-hidden py-2.5 sm:py-4 flex">
+          <div className="animate-marquee whitespace-nowrap flex items-center font-mono text-xs sm:text-sm font-bold tracking-widest">
+            {Array(8).fill(0).map((_, i) => (
+              <span key={i} className="flex items-center">
+                <span className="mx-6">AL-FATAH SUPERMARKET</span><span className="text-[#4ADE80]">★</span>
+                <span className="mx-6">KHAADI</span><span className="text-[#4ADE80]">★</span>
+                <span className="mx-6">METRO CASH & CARRY</span><span className="text-[#4ADE80]">★</span>
+                <span className="mx-6">SAVOUR FOODS</span><span className="text-[#4ADE80]">★</span>
+                <span className="mx-6">IMTIAZ SUPER MARKET</span><span className="text-[#4ADE80]">★</span>
+                <span className="mx-6">CHASE UP</span><span className="text-[#4ADE80]">★</span>
+                <span className="mx-6">SANA SAFINAZ</span><span className="text-[#4ADE80]">★</span>
+                <span className="mx-6">CARREFOUR</span><span className="text-[#4ADE80]">★</span>
+                <span className="mx-6">LALA TEXTILE</span><span className="text-[#4ADE80]">★</span>
+              </span>
+            ))}
+          </div>
         </div>
       </div>
 
       {/* The Problem with Paper */}
       <section ref={stickyContainerRef} className="relative w-full bg-[#FFF248] h-auto md:h-[400vh]">
+        <div className="absolute top-[10%] left-[62%] rotate-[-8deg] z-20 xl:block hidden">
+      <img src={imgTongue} alt="" className="absolute -bottom-6 -left-5 w-14 h-14 -rotate-6 object-contain pointer-events-none drop-shadow-md z-10" />
+      <div className="pill-box bg-white border-[2px] border-[#111111] shadow-[2px_2px_0px_0px_#111111] rounded-full px-4 py-1.5 font-sans font-[700] text-[11px] text-[#111111] whitespace-nowrap">
+        🌿 100% paperless
+      </div>
+    </div>
         {/* Sticky viewport content container */}
         <div className="relative md:sticky top-0 h-auto md:h-screen w-full flex flex-col justify-center py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-8 lg:px-12">
           
-          <div className="max-w-[70.625rem] mx-auto w-full">
+          <div className="max-w-[85rem] mx-auto w-full">
             <div className="flex justify-center mb-6 sm:mb-8 md:mb-12">
               <Pill text="The Problem with Paper" colorClass="bg-white" />
             </div>
@@ -577,52 +676,64 @@ export default function App() {
       </section>
 
       {/* How It Works */}
-      <section ref={howItWorksRef} className="py-12 md:py-20 px-4 sm:px-6 md:px-8 lg:px-12 w-full bg-[#FFFDF7]">
-        <div className="max-w-[70.625rem] mx-auto">
+      <section ref={howItWorksRef} className="py-12 md:py-20 px-4 sm:px-6 md:px-8 lg:px-12 w-full bg-[#FFFDF7] relative">
+        <div className="absolute top-4 right-4 rotate-[-6deg] z-10 xl:block hidden">
+      <img src={imgWink} alt="" className="absolute -bottom-5 -right-4 w-12 h-12 rotate-12 object-contain pointer-events-none drop-shadow-md z-10" />
+      <div className="pill-box bg-white border-[2px] border-[#111111] shadow-[2px_2px_0px_0px_#111111] rounded-full px-4 py-1.5 font-sans font-[700] text-[11px] text-[#111111] whitespace-nowrap">
+        📵 No app needed
+      </div>
+    </div>
+        <div className="max-w-[85rem] mx-auto">
         <div className="flex justify-center mb-10">
           <Pill text="How It Works" colorClass="bg-[#4ADE80]" />
         </div>
         <h2 className="text-center font-syne text-3xl sm:text-4xl font-extrabold mb-12">Four steps.<br/>That's it.</h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className={getCardClasses(activeHowItWorks[0], 'bg-white', 'text-black')}>
             <div className="inline-block bg-white border-2 border-black text-black px-3 py-1 rounded-full font-bold text-xs uppercase tracking-wider mb-6">
               Step 01
             </div>
-            <h3 className="font-syne text-3xl font-extrabold mb-4">Purchase made.</h3>
-            <p className="text-lg font-medium text-gray-800">Customer pays as usual — cash, card, JazzCash, Raast, or Easypaisa. The cashier presses Print exactly as always.</p>
+            <h3 className="font-syne text-2xl lg:text-xl min-[1200px]:text-2xl xl:text-3xl font-extrabold mb-4 break-normal">Purchase made.</h3>
+            <p className="text-sm sm:text-base xl:text-lg font-medium text-gray-800">Customer pays as usual — cash, card, JazzCash, Raast, or Easypaisa. The cashier presses Print exactly as always.</p>
           </div>
 
           <div className={getCardClasses(activeHowItWorks[1], 'bg-[#FFF9C4]', 'text-black')}>
             <div className="inline-block bg-white border-2 border-black text-black px-3 py-1 rounded-full font-bold text-xs uppercase tracking-wider mb-6">
               Step 02
             </div>
-            <h3 className="font-syne text-3xl font-extrabold mb-4">Intercepted instantly.</h3>
-            <p className="text-lg font-medium text-gray-800">Our middleware reads the print job in parallel. The receipt prints on paper and triggers the digital version simultaneously.</p>
+            <h3 className="font-syne text-2xl lg:text-xl min-[1200px]:text-2xl xl:text-3xl font-extrabold mb-4 break-normal">Intercepted instantly.</h3>
+            <p className="text-sm sm:text-base xl:text-lg font-medium text-gray-800">Our middleware reads the print job in parallel. The receipt prints on paper and triggers the digital version simultaneously.</p>
           </div>
 
           <div className={getCardClasses(activeHowItWorks[2], 'bg-[#DCFCE7]', 'text-black')}>
             <div className="inline-block bg-white border-2 border-black text-black px-3 py-1 rounded-full font-bold text-xs uppercase tracking-wider mb-6">
               Step 03
             </div>
-            <h3 className="font-syne text-3xl font-extrabold mb-4">Counter device fires.</h3>
-            <p className="text-lg font-medium text-gray-800">The Android tablet displays a QR code and writes the receipt URL to NFC — completely offline at the counter.</p>
+            <h3 className="font-syne text-2xl lg:text-xl min-[1200px]:text-2xl xl:text-3xl font-extrabold mb-4 break-normal">Counter device fires.</h3>
+            <p className="text-sm sm:text-base xl:text-lg font-medium text-gray-800">The Android tablet displays a QR code and writes the receipt URL to NFC — completely offline at the counter.</p>
           </div>
 
           <div className={getCardClasses(activeHowItWorks[3], 'bg-[#22C55E]', 'text-[#111111]')}>
             <div className="inline-block bg-[#111111] border-2 border-black text-[#22C55E] px-3 py-1 rounded-full font-bold text-xs uppercase tracking-wider mb-6">
               Step 04
             </div>
-            <h3 className="font-syne text-3xl font-extrabold mb-4 text-[#111111]">Customer taps. Done.</h3>
-            <p className="text-lg font-medium text-[#111111]">One tap opens the receipt in the browser. No app, no account, no friction. Searchable and stored forever.</p>
+            <h3 className="font-syne text-2xl lg:text-xl min-[1200px]:text-2xl xl:text-3xl font-extrabold mb-4 text-[#111111] break-normal">Customer taps. Done.</h3>
+            <p className="text-sm sm:text-base xl:text-lg font-medium text-[#111111]">One tap opens the receipt in the browser. No app, no account, no friction. Searchable and stored forever.</p>
           </div>
         </div>
         </div>
       </section>
 
       {/* The Interaction */}
-      <section className="py-12 md:py-20 px-4 sm:px-6 md:px-8 lg:px-12 w-full bg-[#dcfce7] border-y-4 border-black">
-        <div className="max-w-[70.625rem] mx-auto relative">
+      <section className="py-12 md:py-20 px-4 sm:px-6 md:px-8 lg:px-12 w-full bg-[#dcfce7] border-y-4 border-black relative">
+        <div className="absolute bottom-8 left-4 rotate-[6deg] z-20 xl:block hidden">
+      <img src={imgGlasses} alt="" className="absolute -top-5 left-10 w-12 h-12 rotate-[15deg] object-contain pointer-events-none drop-shadow-md z-10" />
+      <div className="pill-box bg-white border-[2px] border-[#111111] shadow-[2px_2px_0px_0px_#111111] rounded-full px-4 py-1.5 font-sans font-[700] text-[11px] text-[#111111] whitespace-nowrap">
+        🔒 End-to-end encrypted
+      </div>
+    </div>
+        <div className="max-w-[85rem] mx-auto relative">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
           <div>
             <div className="inline-block bg-white border-2 border-black px-3 py-1 rounded-full font-bold text-xs uppercase tracking-wider mb-8">
@@ -676,8 +787,14 @@ export default function App() {
       </section>
 
       {/* Infrastructure */}
-      <section className="py-12 md:py-20 px-4 sm:px-6 md:px-8 lg:px-12 w-full bg-[#eef2ff]">
-        <div className="max-w-[70.625rem] mx-auto">
+      <section className="py-12 md:py-20 px-4 sm:px-6 md:px-8 lg:px-12 w-full bg-[#eef2ff] relative">
+        <div className="absolute bottom-[-1.5rem] left-8 rotate-[4deg] z-10 xl:block hidden">
+      <img src={imgCheckmark} alt="" className="absolute -top-4 -right-5 w-10 h-10 rotate-6 object-contain pointer-events-none drop-shadow-md z-10" />
+      <div className="pill-box bg-white border-[2px] border-[#111111] shadow-[2px_2px_0px_0px_#111111] rounded-full px-4 py-1.5 font-sans font-[700] text-[11px] text-[#111111] whitespace-nowrap">
+        ✓ FBR compliant
+      </div>
+    </div>
+        <div className="max-w-[85rem] mx-auto">
         <div className="flex justify-center mb-10">
           <Pill text="Infrastructure" colorClass="bg-[#eef2ff]" />
         </div>
@@ -714,8 +831,15 @@ export default function App() {
       </section>
 
       {/* Interactive Calculator */}
-      <section className="py-12 md:py-20 px-4 sm:px-6 md:px-8 lg:px-12 w-full bg-[#FDFBEE]">
-        <div className="max-w-[70.625rem] mx-auto">
+      <section className="py-12 md:py-20 px-4 sm:px-6 md:px-8 lg:px-12 w-full bg-[#FDFBEE] relative">
+        <div className="absolute top-8 right-8 rotate-[8deg] z-20 xl:block hidden">
+      <img src={imgSpark} alt="" className="absolute -top-5 -left-4 w-10 h-10 -rotate-[20deg] object-contain pointer-events-none drop-shadow-md z-10" />
+      <img src={imgConfetti} alt="" className="absolute -bottom-6 -right-6 w-12 h-12 rotate-[25deg] object-contain pointer-events-none drop-shadow-md z-10" />
+      <div className="pill-box bg-white border-[2px] border-[#111111] shadow-[2px_2px_0px_0px_#111111] rounded-full px-4 py-1.5 font-sans font-[700] text-[11px] text-[#111111] whitespace-nowrap">
+        📍 Made in Pakistan
+      </div>
+    </div>
+        <div className="max-w-[85rem] mx-auto">
         <div className="bg-white border-4 border-black rounded-3xl sm:rounded-[3rem] p-4 sm:p-10 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] sm:shadow-[16px_16px_0px_0px_rgba(0,0,0,1)]">
           <div className="text-center mb-12">
             <div className="inline-block bg-[#FFF248] border-2 border-black px-3 py-1 rounded-full font-bold text-xs uppercase tracking-wider mb-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
@@ -764,93 +888,85 @@ export default function App() {
       </section>
 
       {/* Built for everyone */}
-      <section className="py-12 md:py-20 px-4 sm:px-6 md:px-8 lg:px-12 w-full bg-[#FFF248]">
-        <div className="max-w-[70.625rem] mx-auto">
+      <section className="py-12 md:py-20 px-4 sm:px-6 md:px-8 lg:px-12 w-full bg-[#FFF248] relative">
+        <div className="absolute top-[-1rem] left-[15%] rotate-[-4deg] z-10 xl:block hidden">
+      <img src={imgCoin} alt="" className="absolute -bottom-5 -right-3 w-10 h-10 -rotate-12 object-contain pointer-events-none drop-shadow-md z-10" />
+      <div className="pill-box bg-white border-[2px] border-[#111111] shadow-[2px_2px_0px_0px_#111111] rounded-full px-4 py-1.5 font-sans font-[700] text-[11px] text-[#111111] whitespace-nowrap">
+        0 POS changes
+      </div>
+    </div>
+        <div className="max-w-[85rem] mx-auto">
         <div className="bg-white border-4 border-black rounded-[3rem] p-6 md:p-10 shadow-[16px_16px_0px_0px_rgba(0,0,0,1)]">
-          <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-6">
+          <div className="mb-10">
             <h2 className="font-syne text-3xl sm:text-4xl font-extrabold">Built for everyone.</h2>
-            <div className="flex bg-white border-4 border-black rounded-full p-1 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-              <button 
-                onClick={() => setActiveSegment('retailers')}
-                className={`px-4 py-1.5 sm:px-6 sm:py-2 rounded-full font-bold text-xs sm:text-sm uppercase transition-all duration-200 cursor-pointer ${
-                  activeSegment === 'retailers' ? 'bg-[#4ADE80] text-black' : 'text-gray-600 hover:text-black'
-                }`}
-              >
-                Retailers
-              </button>
-              <button 
-                onClick={() => setActiveSegment('customers')}
-                className={`px-4 py-1.5 sm:px-6 sm:py-2 rounded-full font-bold text-xs sm:text-sm uppercase transition-all duration-200 cursor-pointer ${
-                  activeSegment === 'customers' ? 'bg-[#4ADE80] text-black' : 'text-gray-600 hover:text-black'
-                }`}
-              >
-                Customers
-              </button>
+          </div>
+
+          <h3 className="font-syne text-xl font-bold uppercase tracking-wider mb-6 flex items-center gap-3">
+            <span className="bg-[#4ADE80] border-2 border-black px-3 py-1 rounded-full text-xs">For Retailers</span>
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+            <div className="bg-white border-4 border-black rounded-2xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[6px] active:translate-y-[6px] active:shadow-none transition-all">
+              <div className="text-[#4ADE80] mb-4"><Check size={32} /></div>
+              <h3 className="font-syne text-2xl font-bold mb-3">Zero POS changes needed</h3>
+              <p className="text-gray-700 font-medium mb-6">Compatible with every billing system in Pakistan, including legacy setups and custom agents.</p>
+              <span className="font-bold border-b-2 border-black pb-1 hover:text-[#4ADE80] hover:border-[#4ADE80] transition-colors cursor-pointer">Learn more →</span>
+            </div>
+            <div className="bg-white border-4 border-black rounded-2xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[6px] active:translate-y-[6px] active:shadow-none transition-all">
+              <div className="text-[#4ADE80] mb-4"><Check size={32} /></div>
+              <h3 className="font-syne text-2xl font-bold mb-3">Cut thermal roll costs by 85%</h3>
+              <p className="text-gray-700 font-medium mb-6">Save PKR 270,000+ per branch per year while removing the operational mess of paper rolls.</p>
+              <span className="font-bold border-b-2 border-black pb-1 hover:text-[#4ADE80] hover:border-[#4ADE80] transition-colors cursor-pointer">Learn more →</span>
+            </div>
+            <div className="bg-white border-4 border-black rounded-2xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[6px] active:translate-y-[6px] active:shadow-none transition-all">
+              <div className="text-[#4ADE80] mb-4"><Check size={32} /></div>
+              <h3 className="font-syne text-2xl font-bold mb-3">Purchase analytics built in</h3>
+              <p className="text-gray-700 font-medium mb-6">Understand buying patterns across branches without asking customers to install another app.</p>
+              <span className="font-bold border-b-2 border-black pb-1 hover:text-[#4ADE80] hover:border-[#4ADE80] transition-colors cursor-pointer">Learn more →</span>
+            </div>
+            <div className="bg-white border-4 border-black rounded-2xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[6px] active:translate-y-[6px] active:shadow-none transition-all">
+              <div className="text-[#4ADE80] mb-4"><Check size={32} /></div>
+              <h3 className="font-syne text-2xl font-bold mb-3">Eco-Retailer certification</h3>
+              <p className="text-gray-700 font-medium mb-6">A verified badge for your store window, receipts, and digital customer touchpoints.</p>
+              <span className="font-bold border-b-2 border-black pb-1 hover:text-[#4ADE80] hover:border-[#4ADE80] transition-colors cursor-pointer">Learn more →</span>
             </div>
           </div>
-          
-          {activeSegment === 'retailers' ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white border-4 border-black rounded-2xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[6px] active:translate-y-[6px] active:shadow-none transition-all">
-                <div className="text-[#4ADE80] mb-4"><Check size={32} /></div>
-                <h3 className="font-syne text-2xl font-bold mb-3">Zero POS changes needed</h3>
-                <p className="text-gray-700 font-medium mb-6">Compatible with every billing system in Pakistan, including legacy setups and custom agents.</p>
-                <span className="font-bold border-b-2 border-black pb-1 hover:text-[#4ADE80] hover:border-[#4ADE80] transition-colors cursor-pointer">Learn more →</span>
-              </div>
-              <div className="bg-white border-4 border-black rounded-2xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[6px] active:translate-y-[6px] active:shadow-none transition-all">
-                <div className="text-[#4ADE80] mb-4"><Check size={32} /></div>
-                <h3 className="font-syne text-2xl font-bold mb-3">Cut thermal roll costs by 85%</h3>
-                <p className="text-gray-700 font-medium mb-6">Save PKR 270,000+ per branch per year while removing the operational mess of paper rolls.</p>
-                <span className="font-bold border-b-2 border-black pb-1 hover:text-[#4ADE80] hover:border-[#4ADE80] transition-colors cursor-pointer">Learn more →</span>
-              </div>
-              <div className="bg-white border-4 border-black rounded-2xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[6px] active:translate-y-[6px] active:shadow-none transition-all">
-                <div className="text-[#4ADE80] mb-4"><Check size={32} /></div>
-                <h3 className="font-syne text-2xl font-bold mb-3">Purchase analytics built in</h3>
-                <p className="text-gray-700 font-medium mb-6">Understand buying patterns across branches without asking customers to install another app.</p>
-                <span className="font-bold border-b-2 border-black pb-1 hover:text-[#4ADE80] hover:border-[#4ADE80] transition-colors cursor-pointer">Learn more →</span>
-              </div>
-              <div className="bg-white border-4 border-black rounded-2xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[6px] active:translate-y-[6px] active:shadow-none transition-all">
-                <div className="text-[#4ADE80] mb-4"><Check size={32} /></div>
-                <h3 className="font-syne text-2xl font-bold mb-3">Eco-Retailer certification</h3>
-                <p className="text-gray-700 font-medium mb-6">A verified badge for your store window, receipts, and digital customer touchpoints.</p>
-                <span className="font-bold border-b-2 border-black pb-1 hover:text-[#4ADE80] hover:border-[#4ADE80] transition-colors cursor-pointer">Learn more →</span>
-              </div>
+
+          <h3 className="font-syne text-xl font-bold uppercase tracking-wider mb-6 flex items-center gap-3">
+            <span className="bg-[#FFF248] border-2 border-black px-3 py-1 rounded-full text-xs">For Customers</span>
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-white border-4 border-black rounded-2xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[6px] active:translate-y-[6px] active:shadow-none transition-all">
+              <div className="text-[#4ADE80] mb-4"><Check size={32} /></div>
+              <h3 className="font-syne text-2xl font-bold mb-3">Never Lost</h3>
+              <p className="text-gray-700 font-medium mb-6">All your receipts are permanently archived and searchable from any device.</p>
+              <span className="font-bold border-b-2 border-black pb-1 hover:text-[#4ADE80] hover:border-[#4ADE80] transition-colors cursor-pointer">Learn more →</span>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white border-4 border-black rounded-2xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[6px] active:translate-y-[6px] active:shadow-none transition-all">
-                <div className="text-[#4ADE80] mb-4"><Check size={32} /></div>
-                <h3 className="font-syne text-2xl font-bold mb-3">Never Lost</h3>
-                <p className="text-gray-700 font-medium mb-6">All your receipts are permanently archived and searchable.</p>
-                <span className="font-bold border-b-2 border-black pb-1 hover:text-[#4ADE80] hover:border-[#4ADE80] transition-colors cursor-pointer">Learn more →</span>
-              </div>
-              <div className="bg-white border-4 border-black rounded-2xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[6px] active:translate-y-[6px] active:shadow-none transition-all">
-                <div className="text-[#4ADE80] mb-4"><Check size={32} /></div>
-                <h3 className="font-syne text-2xl font-bold mb-3">Easy Returns</h3>
-                <p className="text-gray-700 font-medium mb-6">One-tap barcode access for seamless store returns.</p>
-                <span className="font-bold border-b-2 border-black pb-1 hover:text-[#4ADE80] hover:border-[#4ADE80] transition-colors cursor-pointer">Learn more →</span>
-              </div>
-              <div className="bg-white border-4 border-black rounded-2xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[6px] active:translate-y-[6px] active:shadow-none transition-all">
-                <div className="text-[#4ADE80] mb-4"><Check size={32} /></div>
-                <h3 className="font-syne text-2xl font-bold mb-3 uppercase">EXPENSE TRACKING</h3>
-                <p className="text-gray-700 font-medium mb-6">Auto-categorize your spending.</p>
-                <span className="font-bold border-b-2 border-black pb-1 hover:text-[#4ADE80] hover:border-[#4ADE80] transition-colors cursor-pointer">Learn more →</span>
-              </div>
-              <div className="bg-white border-4 border-black rounded-2xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[6px] active:translate-y-[6px] active:shadow-none transition-all">
-                <div className="text-[#4ADE80] mb-4"><Check size={32} /></div>
-                <h3 className="font-syne text-2xl font-bold mb-3 uppercase">LOYALTY</h3>
-                <p className="text-gray-700 font-medium mb-6">Integrated reward point tracking.</p>
-                <span className="font-bold border-b-2 border-black pb-1 hover:text-[#4ADE80] hover:border-[#4ADE80] transition-colors cursor-pointer">Learn more →</span>
-              </div>
+            <div className="bg-white border-4 border-black rounded-2xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[6px] active:translate-y-[6px] active:shadow-none transition-all">
+              <div className="text-[#4ADE80] mb-4"><Check size={32} /></div>
+              <h3 className="font-syne text-2xl font-bold mb-3">Easy Returns</h3>
+              <p className="text-gray-700 font-medium mb-6">One-tap barcode access for seamless store returns — no digging through drawers.</p>
+              <span className="font-bold border-b-2 border-black pb-1 hover:text-[#4ADE80] hover:border-[#4ADE80] transition-colors cursor-pointer">Learn more →</span>
             </div>
-          )}
+            <div className="bg-white border-4 border-black rounded-2xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[6px] active:translate-y-[6px] active:shadow-none transition-all">
+              <div className="text-[#4ADE80] mb-4"><Check size={32} /></div>
+              <h3 className="font-syne text-2xl font-bold mb-3">Expense Tracking</h3>
+              <p className="text-gray-700 font-medium mb-6">Auto-categorize your spending across stores. No manual entry, ever.</p>
+              <span className="font-bold border-b-2 border-black pb-1 hover:text-[#4ADE80] hover:border-[#4ADE80] transition-colors cursor-pointer">Learn more →</span>
+            </div>
+            <div className="bg-white border-4 border-black rounded-2xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[6px] active:translate-y-[6px] active:shadow-none transition-all">
+              <div className="text-[#4ADE80] mb-4"><Check size={32} /></div>
+              <h3 className="font-syne text-2xl font-bold mb-3">Loyalty</h3>
+              <p className="text-gray-700 font-medium mb-6">Integrated reward point tracking — your points, automatically, on every receipt.</p>
+              <span className="font-bold border-b-2 border-black pb-1 hover:text-[#4ADE80] hover:border-[#4ADE80] transition-colors cursor-pointer">Learn more →</span>
+            </div>
+          </div>
         </div>
         </div>
       </section>
 
       {/* Security */}
-      <section className="py-12 md:py-20 px-4 sm:px-6 md:px-8 lg:px-12 w-full bg-[#FDFBEE]">
-        <div className="max-w-[70.625rem] mx-auto">
+      <section className="py-12 md:py-20 px-4 sm:px-6 md:px-8 lg:px-12 w-full bg-[#FDFBEE] relative">
+        <div className="max-w-[85rem] mx-auto">
         <div className="flex flex-col lg:flex-row gap-10 items-center mb-12">
           <div className="lg:w-1/2">
             <div className="inline-block bg-black text-white border-2 border-black px-3 py-1 rounded-full shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] font-bold text-xs uppercase tracking-wider mb-8">
@@ -934,12 +1050,12 @@ export default function App() {
           </h2>
           <p className="text-2xl font-bold mb-12">Join Pakistan's paperless retail revolution.</p>
           <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6 w-full sm:w-auto">
-            <button className="w-full sm:w-auto bg-black text-white font-bold px-6 py-2.5 rounded-2xl border-4 border-black shadow-[8px_8px_0px_0px_rgba(74,222,128,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[6px_6px_0px_0px_rgba(74,222,128,1)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all uppercase text-sm">
-              Book a Demo
-            </button>
-            <button className="w-full sm:w-auto bg-white text-black font-bold px-6 py-2.5 rounded-2xl border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all uppercase text-sm">
-              Request Integration
-            </button>
+            <BrutalButton className="w-full sm:w-auto bg-black text-white font-bold px-6 py-2.5 rounded-2xl border-4 border-black uppercase text-sm" baseShadow="8px 8px 0px 0px rgba(74,222,128,1)">
+              Start Your Free Pilot
+            </BrutalButton>
+            <BrutalButton className="w-full sm:w-auto bg-white text-black font-bold px-6 py-2.5 rounded-2xl border-4 border-black uppercase text-sm" baseShadow="8px 8px 0px 0px rgba(0,0,0,1)">
+              Check POS Compatibility
+            </BrutalButton>
           </div>
         </div>
       </section>
@@ -957,11 +1073,17 @@ export default function App() {
             <form className="space-y-6" onSubmit={e => e.preventDefault()}>
               <input type="text" placeholder="Business Name" className="w-full px-4 py-2.5 rounded-xl border-4 border-black font-bold outline-none focus:bg-[#dcfce7] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-colors text-sm" />
               <input type="email" placeholder="Contact Email" className="w-full px-4 py-2.5 rounded-xl border-4 border-black font-bold outline-none focus:bg-[#dcfce7] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-colors text-sm" />
-              <input type="text" placeholder="City" className="w-full px-4 py-2.5 rounded-xl border-4 border-black font-bold outline-none focus:bg-[#dcfce7] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-colors text-sm" />
-              <input type="text" placeholder="Daily Transactions" className="w-full px-4 py-2.5 rounded-xl border-4 border-black font-bold outline-none focus:bg-[#dcfce7] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-colors text-sm" />
-              <button type="submit" className="w-full bg-[#4ADE80] text-black font-bold px-4 py-2.5 rounded-xl border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all uppercase text-sm mt-4 flex items-center justify-center gap-2">
-                Send <ArrowRight size={20} />
-              </button>
+              <BrutalButton type="submit" className="w-full bg-[#4ADE80] text-black font-bold px-4 py-2.5 rounded-xl border-4 border-black uppercase text-sm mt-4 flex items-center justify-center gap-2" baseShadow="8px 8px 0px 0px rgba(0,0,0,1)">
+                Get a Free Compatibility Check <ArrowRight size={20} />
+              </BrutalButton>
+              <p className="text-xs font-bold text-gray-500 text-center">We'll reply within 4 hours with a POS compatibility check.</p>
+              <div className="flex flex-col sm:flex-row gap-3 pt-2 text-xs font-bold uppercase tracking-wider text-gray-500">
+                <span className="flex items-center gap-1"><span className="text-[#4ADE80]">1.</span> We review your POS setup</span>
+                <span className="hidden sm:block">→</span>
+                <span className="flex items-center gap-1"><span className="text-[#4ADE80]">2.</span> Free compatibility check</span>
+                <span className="hidden sm:block">→</span>
+                <span className="flex items-center gap-1"><span className="text-[#4ADE80]">3.</span> Live in 48 hours</span>
+              </div>
             </form>
           </div>
           

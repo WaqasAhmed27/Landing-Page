@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
 import { ActiveTrailImage } from '../types';
 import { TRAIL_IMAGES } from '../data';
 
@@ -8,6 +9,7 @@ export default function TrailCanvas() {
   const lastMousePos = useRef({ x: 0, y: 0 });
   const currentIndex = useRef(0);
   const highestZIndex = useRef(100);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Core physics parameters requested by user
   const DISTANCE_THRESHOLD = 30; // Min distance threshold
@@ -42,8 +44,10 @@ export default function TrailCanvas() {
       return updated;
     });
 
-    // Handle 500ms lifespan expiry
+    // Handle lifespan expiry by triggering removal
     setTimeout(() => {
+      // Instead of abruptly removing, we let the exit animation complete first.
+      // But the enter animation takes care of the exit. We'll clean up state anyway.
       setImages(prev => prev.filter(img => img.id !== id));
     }, LIFESPAN);
   };
@@ -76,50 +80,75 @@ export default function TrailCanvas() {
     };
   }, []);
 
+  // GSAP animation for new elements
+  useGSAP(() => {
+    if (!containerRef.current) return;
+    
+    const imageElements = gsap.utils.toArray('.trail-image', containerRef.current) as HTMLDivElement[];
+    
+    imageElements.forEach((el) => {
+      if (el.dataset.animated) return; // skip already animated ones
+      el.dataset.animated = "true";
+      
+      const rotation = parseFloat(el.dataset.rotation || "0");
+      
+      gsap.fromTo(el, 
+        { 
+          opacity: 0, 
+          scale: 0.35, 
+          rotation: rotation 
+        },
+        { 
+          opacity: 1, 
+          scale: 1.0, 
+          rotation: rotation, 
+          duration: 0.25, 
+          ease: "back.out(2)" 
+        }
+      );
+      
+      // Exit animation before React unmounts it
+      gsap.to(el, {
+        opacity: 0,
+        scale: 0.0,
+        rotation: rotation,
+        duration: 0.3,
+        ease: "power2.in",
+        delay: (LIFESPAN / 1000) - 0.3 // start exit just before unmount
+      });
+    });
+  }, { scope: containerRef, dependencies: [images] });
+
   return (
     <div
       id="simple-trail-canvas"
+      ref={containerRef}
       className="fixed inset-0 pointer-events-none z-[9999] select-none overflow-hidden"
     >
-      {/* Trail Animation Render Stream */}
-      <AnimatePresence mode="popLayout">
-        {images.map((img) => (
-          <motion.div
-            key={img.id}
-            className="absolute pointer-events-none origin-center"
-            style={{
-              left: img.x,
-              top: img.y,
-              width: IMAGE_WIDTH,
-              height: IMAGE_HEIGHT,
-              zIndex: img.zIndex,
-              transform: 'translate(-50%, -50%)',
-            }}
-            initial={{ opacity: 0, scale: 0.35, rotate: img.rotation }}
-            animate={{ 
-              opacity: 1, 
-              scale: 1.0, 
-              rotate: img.rotation, 
-              transition: { type: "spring", stiffness: 220, damping: 20 } 
-            }}
-            exit={{ 
-              opacity: 0, 
-              scale: 0.0, // "shrinking core" animation
-              rotate: img.rotation, 
-              transition: { duration: 0.3, ease: "easeIn" } 
-            }}
-          >
-            <div className="w-full h-full pointer-events-none select-none">
-              <img
-                src={img.url}
-                alt="Trail Snapshot"
-                referrerPolicy="no-referrer"
-                className="w-full h-full object-contain select-none pointer-events-none"
-              />
-            </div>
-          </motion.div>
-        ))}
-      </AnimatePresence>
+      {images.map((img) => (
+        <div
+          key={img.id}
+          className="trail-image absolute pointer-events-none origin-center"
+          data-rotation={img.rotation}
+          style={{
+            left: img.x,
+            top: img.y,
+            width: IMAGE_WIDTH,
+            height: IMAGE_HEIGHT,
+            zIndex: img.zIndex,
+            transform: 'translate(-50%, -50%)',
+          }}
+        >
+          <div className="w-full h-full pointer-events-none select-none">
+            <img
+              src={img.url}
+              alt="Trail Snapshot"
+              referrerPolicy="no-referrer"
+              className="w-full h-full object-contain select-none pointer-events-none"
+            />
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
