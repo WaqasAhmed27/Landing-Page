@@ -1,4 +1,4 @@
-import { useState, useRef, RefObject } from "react";
+import React, { useState, useRef, RefObject } from "react";
 import { Check, Menu, X, Plus, Droplet, Recycle, Trees, ArrowRight, Smartphone, Nfc, QrCodeIcon } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -31,9 +31,61 @@ export default function App() {
   const [faqOpen, setFaqOpen] = useState<number | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [useOriginalLogo, setUseOriginalLogo] = useState(false);
-const [logoClicks, setLogoClicks] = useState(0);
+  const [logoClicks, setLogoClicks] = useState(0);
   const [trailEnabled, setTrailEnabled] = useState(false);
   const [activeHowItWorks, setActiveHowItWorks] = useState([true, false, false, false]);
+
+  const [formData, setFormData] = useState({
+    businessName: "",
+    email: "",
+    city: "",
+    posSoftware: ""
+  });
+  const [formStatus, setFormStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const [formErrorMessage, setFormErrorMessage] = useState("");
+
+  const scrollToSection = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+    }
+    setMobileMenuOpen(false);
+  };
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.businessName.trim() || !formData.email.trim()) {
+      setFormStatus("error");
+      setFormErrorMessage("Please enter both your Business Name and Contact Email.");
+      return;
+    }
+
+    setFormStatus("submitting");
+    setFormErrorMessage("");
+
+    try {
+      const contactEndpoint = import.meta.env.VITE_CONTACT_API_URL;
+      if (contactEndpoint) {
+        const res = await fetch(contactEndpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...formData,
+            submittedAt: new Date().toISOString(),
+          }),
+        });
+        if (!res.ok) throw new Error("Server returned an error");
+      } else {
+        await new Promise((resolve) => setTimeout(resolve, 600));
+        console.log("Contact form submitted (no VITE_CONTACT_API_URL specified):", formData);
+      }
+      setFormStatus("success");
+    } catch (err) {
+      console.error("Form submit error:", err);
+      setFormStatus("error");
+      setFormErrorMessage("Failed to submit request. Please try again or email contact@taptile.pk directly.");
+    }
+  };
   
   const stickyContainerRef = useRef<HTMLDivElement>(null);
   const howItWorksRef = useRef<HTMLElement>(null);
@@ -433,14 +485,14 @@ const [logoClicks, setLogoClicks] = useState(0);
           </div>
           
           <div className="hidden md:flex gap-10 font-bold text-sm uppercase tracking-wider">
-            <a href="#platform" className="hover:text-[#4ADE80] transition-colors">Platform</a>
-            <a href="#integration" className="hover:text-[#4ADE80] transition-colors">Integration</a>
-            <a href="#security" className="hover:text-[#4ADE80] transition-colors">Security</a>
-            <a href="#pricing" className="hover:text-[#4ADE80] transition-colors">Pricing</a>
+            <a href="#platform" onClick={(e) => { e.preventDefault(); scrollToSection('platform'); }} className="hover:text-[#4ADE80] transition-colors">Platform</a>
+            <a href="#integration" onClick={(e) => { e.preventDefault(); scrollToSection('integration'); }} className="hover:text-[#4ADE80] transition-colors">Integration</a>
+            <a href="#security" onClick={(e) => { e.preventDefault(); scrollToSection('security'); }} className="hover:text-[#4ADE80] transition-colors">Security</a>
+            <a href="#pricing" onClick={(e) => { e.preventDefault(); scrollToSection('pricing'); }} className="hover:text-[#4ADE80] transition-colors">Pricing</a>
           </div>
           
           <div className="hidden md:block">
-            <BrutalButton className="bg-[#4ADE80] border-2 border-black rounded-lg px-6 py-2.5 font-bold uppercase text-sm" baseShadow="4px 4px 0px 0px rgba(0,0,0,1)">
+            <BrutalButton onClick={() => scrollToSection('contact')} className="bg-[#4ADE80] border-2 border-black rounded-lg px-6 py-2.5 font-bold uppercase text-sm" baseShadow="4px 4px 0px 0px rgba(0,0,0,1)">
               Book a Demo
             </BrutalButton>
           </div>
@@ -454,11 +506,11 @@ const [logoClicks, setLogoClicks] = useState(0);
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
         <div className="md:hidden absolute top-20 left-0 w-full bg-[#FDFBEE] border-b-4 border-black z-40 px-5 py-5 flex flex-col gap-4 shadow-[0_8px_0_0_rgba(0,0,0,1)]">
-          <a href="#platform" className="font-bold text-lg hover:text-[#4ADE80] transition-colors" onClick={() => setMobileMenuOpen(false)}>Platform</a>
-          <a href="#integration" className="font-bold text-lg hover:text-[#4ADE80] transition-colors" onClick={() => setMobileMenuOpen(false)}>Integration</a>
-          <a href="#security" className="font-bold text-lg hover:text-[#4ADE80] transition-colors" onClick={() => setMobileMenuOpen(false)}>Security</a>
-          <a href="#pricing" className="font-bold text-lg hover:text-[#4ADE80] transition-colors" onClick={() => setMobileMenuOpen(false)}>Pricing</a>
-          <BrutalButton className="mt-4 bg-[#4ADE80] border-2 border-black rounded-lg px-6 py-3 font-bold uppercase text-sm" baseShadow="4px 4px 0px 0px rgba(0,0,0,1)">
+          <a href="#platform" className="font-bold text-lg hover:text-[#4ADE80] transition-colors" onClick={(e) => { e.preventDefault(); scrollToSection('platform'); }}>Platform</a>
+          <a href="#integration" className="font-bold text-lg hover:text-[#4ADE80] transition-colors" onClick={(e) => { e.preventDefault(); scrollToSection('integration'); }}>Integration</a>
+          <a href="#security" className="font-bold text-lg hover:text-[#4ADE80] transition-colors" onClick={(e) => { e.preventDefault(); scrollToSection('security'); }}>Security</a>
+          <a href="#pricing" className="font-bold text-lg hover:text-[#4ADE80] transition-colors" onClick={(e) => { e.preventDefault(); scrollToSection('pricing'); }}>Pricing</a>
+          <BrutalButton onClick={() => scrollToSection('contact')} className="mt-4 bg-[#4ADE80] border-2 border-black rounded-lg px-6 py-3 font-bold uppercase text-sm" baseShadow="4px 4px 0px 0px rgba(0,0,0,1)">
             Book a Demo
           </BrutalButton>
         </div>
@@ -505,10 +557,10 @@ const [logoClicks, setLogoClicks] = useState(0);
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-            <BrutalButton className="w-full sm:w-auto bg-[#4ADE80] text-black font-bold px-4 py-2.5 text-sm rounded-md border-2 border-black uppercase text-sm tracking-wider" baseShadow="4px 4px 0px 0px rgba(0,0,0,1)">
+            <BrutalButton onClick={() => scrollToSection('integration')} className="w-full sm:w-auto bg-[#4ADE80] text-black font-bold px-4 py-2.5 text-sm rounded-md border-2 border-black uppercase text-sm tracking-wider" baseShadow="4px 4px 0px 0px rgba(0,0,0,1)">
               See It In Action
             </BrutalButton>
-            <BrutalButton className="w-full sm:w-auto bg-white text-black font-bold px-4 py-2.5 text-sm rounded-md border-2 border-black uppercase text-sm tracking-wider" baseShadow="4px 4px 0px 0px rgba(0,0,0,1)">
+            <BrutalButton onClick={() => scrollToSection('contact')} className="w-full sm:w-auto bg-white text-black font-bold px-4 py-2.5 text-sm rounded-md border-2 border-black uppercase text-sm tracking-wider" baseShadow="4px 4px 0px 0px rgba(0,0,0,1)">
               Check POS Compatibility
             </BrutalButton>
           </div>
@@ -589,7 +641,7 @@ const [logoClicks, setLogoClicks] = useState(0);
       </div>
 
       {/* The Problem with Paper */}
-      <section ref={stickyContainerRef} className="relative w-full bg-[#FFF248] h-auto md:h-[400vh]">
+      <section id="platform" ref={stickyContainerRef} className="relative w-full bg-[#FFF248] h-auto md:h-[400vh]">
         <div className="absolute top-[10%] left-[62%] rotate-[-8deg] z-20 xl:block hidden">
       <img src={imgTongue} alt="" className="absolute -bottom-6 -left-5 w-14 h-14 -rotate-6 object-contain pointer-events-none drop-shadow-md z-10" />
       <div className="pill-box bg-white border-[2px] border-[#111111] shadow-[2px_2px_0px_0px_#111111] rounded-full px-4 py-1.5 font-sans font-[700] text-[11px] text-[#111111] whitespace-nowrap">
@@ -787,7 +839,7 @@ const [logoClicks, setLogoClicks] = useState(0);
       </section>
 
       {/* Infrastructure */}
-      <section className="py-12 md:py-20 px-4 sm:px-6 md:px-8 lg:px-12 w-full bg-[#eef2ff] relative">
+      <section id="integration" className="py-12 md:py-20 px-4 sm:px-6 md:px-8 lg:px-12 w-full bg-[#eef2ff] relative">
         <div className="absolute bottom-[-1.5rem] left-8 rotate-[4deg] z-10 xl:block hidden">
       <img src={imgCheckmark} alt="" className="absolute -top-4 -right-5 w-10 h-10 rotate-6 object-contain pointer-events-none drop-shadow-md z-10" />
       <div className="pill-box bg-white border-[2px] border-[#111111] shadow-[2px_2px_0px_0px_#111111] rounded-full px-4 py-1.5 font-sans font-[700] text-[11px] text-[#111111] whitespace-nowrap">
@@ -831,7 +883,7 @@ const [logoClicks, setLogoClicks] = useState(0);
       </section>
 
       {/* Interactive Calculator */}
-      <section className="py-12 md:py-20 px-4 sm:px-6 md:px-8 lg:px-12 w-full bg-[#FDFBEE] relative">
+      <section id="pricing" className="py-12 md:py-20 px-4 sm:px-6 md:px-8 lg:px-12 w-full bg-[#FDFBEE] relative">
         <div className="absolute top-8 right-8 rotate-[8deg] z-20 xl:block hidden">
       <img src={imgSpark} alt="" className="absolute -top-5 -left-4 w-10 h-10 -rotate-[20deg] object-contain pointer-events-none drop-shadow-md z-10" />
       <img src={imgConfetti} alt="" className="absolute -bottom-6 -right-6 w-12 h-12 rotate-[25deg] object-contain pointer-events-none drop-shadow-md z-10" />
@@ -965,7 +1017,7 @@ const [logoClicks, setLogoClicks] = useState(0);
       </section>
 
       {/* Security */}
-      <section className="py-12 md:py-20 px-4 sm:px-6 md:px-8 lg:px-12 w-full bg-[#FDFBEE] relative">
+      <section id="security" className="py-12 md:py-20 px-4 sm:px-6 md:px-8 lg:px-12 w-full bg-[#FDFBEE] relative">
         <div className="max-w-[85rem] mx-auto">
         <div className="flex flex-col lg:flex-row gap-10 items-center mb-12">
           <div className="lg:w-1/2">
@@ -1050,10 +1102,10 @@ const [logoClicks, setLogoClicks] = useState(0);
           </h2>
           <p className="text-2xl font-bold mb-12">Join Pakistan's paperless retail revolution.</p>
           <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6 w-full sm:w-auto">
-            <BrutalButton className="w-full sm:w-auto bg-black text-white font-bold px-6 py-2.5 rounded-2xl border-4 border-black uppercase text-sm" baseShadow="8px 8px 0px 0px rgba(74,222,128,1)">
+            <BrutalButton onClick={() => scrollToSection('contact')} className="w-full sm:w-auto bg-black text-white font-bold px-6 py-2.5 rounded-2xl border-4 border-black uppercase text-sm" baseShadow="8px 8px 0px 0px rgba(74,222,128,1)">
               Start Your Free Pilot
             </BrutalButton>
-            <BrutalButton className="w-full sm:w-auto bg-white text-black font-bold px-6 py-2.5 rounded-2xl border-4 border-black uppercase text-sm" baseShadow="8px 8px 0px 0px rgba(0,0,0,1)">
+            <BrutalButton onClick={() => scrollToSection('contact')} className="w-full sm:w-auto bg-white text-black font-bold px-6 py-2.5 rounded-2xl border-4 border-black uppercase text-sm" baseShadow="8px 8px 0px 0px rgba(0,0,0,1)">
               Check POS Compatibility
             </BrutalButton>
           </div>
@@ -1061,7 +1113,7 @@ const [logoClicks, setLogoClicks] = useState(0);
       </section>
 
       {/* Get in Touch & Footer */}
-      <section className="pt-12 pb-20 md:pt-20 md:pb-32 px-4 sm:px-6 md:px-8 lg:px-12 w-full bg-[#FDFBEE] relative overflow-hidden">
+      <section id="contact" className="pt-12 pb-20 md:pt-20 md:pb-32 px-4 sm:px-6 md:px-8 lg:px-12 w-full bg-[#FDFBEE] relative overflow-hidden">
         <div className="max-w-[70.625rem] mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center mb-12">
           <div>
@@ -1070,20 +1122,90 @@ const [logoClicks, setLogoClicks] = useState(0);
             </div>
             <h2 className="font-syne text-3xl sm:text-4xl md:text-5xl font-extrabold mb-6 sm:mb-10">Ready to start?</h2>
             
-            <form className="space-y-6" onSubmit={e => e.preventDefault()}>
-              <input type="text" placeholder="Business Name" className="w-full px-4 py-2.5 rounded-xl border-4 border-black font-bold outline-none focus:bg-[#dcfce7] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-colors text-sm" />
-              <input type="email" placeholder="Contact Email" className="w-full px-4 py-2.5 rounded-xl border-4 border-black font-bold outline-none focus:bg-[#dcfce7] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-colors text-sm" />
-              <BrutalButton type="submit" className="w-full bg-[#4ADE80] text-black font-bold px-4 py-2.5 rounded-xl border-4 border-black uppercase text-sm mt-4 flex items-center justify-center gap-2" baseShadow="8px 8px 0px 0px rgba(0,0,0,1)">
-                Get a Free Compatibility Check <ArrowRight size={20} />
-              </BrutalButton>
-              <p className="text-xs font-bold text-gray-500 text-center">We'll reply within 4 hours with a POS compatibility check.</p>
-              <div className="flex flex-col sm:flex-row gap-3 pt-2 text-xs font-bold uppercase tracking-wider text-gray-500">
-                <span className="flex items-center gap-1"><span className="text-[#4ADE80]">1.</span> We review your POS setup</span>
-                <span className="hidden sm:block">→</span>
-                <span className="flex items-center gap-1"><span className="text-[#4ADE80]">2.</span> Free compatibility check</span>
-                <span className="hidden sm:block">→</span>
-                <span className="flex items-center gap-1"><span className="text-[#4ADE80]">3.</span> Live in 48 hours</span>
-              </div>
+            <form className="space-y-4" onSubmit={handleFormSubmit}>
+              {formStatus === "error" && (
+                <div className="bg-[#fee2e2] border-2 border-black text-red-800 p-3 rounded-xl font-bold text-xs shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                  ⚠️ {formErrorMessage}
+                </div>
+              )}
+
+              {formStatus === "success" ? (
+                <div className="bg-[#dcfce7] border-4 border-black p-6 rounded-2xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] space-y-3">
+                  <div className="flex items-center gap-2 font-syne font-bold text-xl text-black">
+                    <Check className="text-[#22C55E]" size={28} /> Compatibility Check Requested!
+                  </div>
+                  <p className="font-medium text-sm text-gray-800 leading-relaxed">
+                    Thank you! We've received your request for <strong>{formData.businessName}</strong>. Our team will review your POS setup and send a full report to <strong>{formData.email}</strong> within 4 hours.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFormData({ businessName: "", email: "", city: "", posSoftware: "" });
+                      setFormStatus("idle");
+                    }}
+                    className="text-xs font-bold uppercase underline tracking-wider cursor-pointer hover:text-[#22C55E]"
+                  >
+                    Submit Another Request →
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Business Name *"
+                    value={formData.businessName}
+                    onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-xl border-4 border-black font-bold outline-none focus:bg-[#dcfce7] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-colors text-sm"
+                  />
+                  <input
+                    type="email"
+                    required
+                    placeholder="Contact Email *"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-xl border-4 border-black font-bold outline-none focus:bg-[#dcfce7] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-colors text-sm"
+                  />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <input
+                      type="text"
+                      placeholder="City (e.g. Lahore, Karachi)"
+                      value={formData.city}
+                      onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                      className="w-full px-4 py-2.5 rounded-xl border-4 border-black font-bold outline-none focus:bg-[#dcfce7] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-colors text-sm"
+                    />
+                    <input
+                      type="text"
+                      placeholder="POS Software (e.g. Candela, Odoo)"
+                      value={formData.posSoftware}
+                      onChange={(e) => setFormData({ ...formData, posSoftware: e.target.value })}
+                      className="w-full px-4 py-2.5 rounded-xl border-4 border-black font-bold outline-none focus:bg-[#dcfce7] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-colors text-sm"
+                    />
+                  </div>
+                  <BrutalButton
+                    type="submit"
+                    disabled={formStatus === "submitting"}
+                    className="w-full bg-[#4ADE80] text-black font-bold px-4 py-2.5 rounded-xl border-4 border-black uppercase text-sm mt-4 flex items-center justify-center gap-2 disabled:opacity-50"
+                    baseShadow="8px 8px 0px 0px rgba(0,0,0,1)"
+                  >
+                    {formStatus === "submitting" ? (
+                      "Sending Request..."
+                    ) : (
+                      <>
+                        Get a Free Compatibility Check <ArrowRight size={20} />
+                      </>
+                    )}
+                  </BrutalButton>
+                  <p className="text-xs font-bold text-gray-500 text-center">We'll reply within 4 hours with a POS compatibility check.</p>
+                  <div className="flex flex-col sm:flex-row gap-3 pt-2 text-xs font-bold uppercase tracking-wider text-gray-500">
+                    <span className="flex items-center gap-1"><span className="text-[#4ADE80]">1.</span> We review your POS setup</span>
+                    <span className="hidden sm:block">→</span>
+                    <span className="flex items-center gap-1"><span className="text-[#4ADE80]">2.</span> Free compatibility check</span>
+                    <span className="hidden sm:block">→</span>
+                    <span className="flex items-center gap-1"><span className="text-[#4ADE80]">3.</span> Live in 48 hours</span>
+                  </div>
+                </>
+              )}
             </form>
           </div>
           
@@ -1116,13 +1238,13 @@ const [logoClicks, setLogoClicks] = useState(0);
             <span className="font-syne font-extrabold text-2xl tracking-tight">TapTile</span>
           </div>
           <div className="flex flex-wrap justify-center gap-6 font-bold text-sm uppercase tracking-wider text-gray-500">
-            <a href="#platform" className="hover:text-[#4ADE80] transition-colors">Platform</a>
+            <a href="#platform" onClick={(e) => { e.preventDefault(); scrollToSection('platform'); }} className="hover:text-[#4ADE80] transition-colors">Platform</a>
             <span>·</span>
-            <a href="#integration" className="hover:text-[#4ADE80] transition-colors">Integration</a>
+            <a href="#integration" onClick={(e) => { e.preventDefault(); scrollToSection('integration'); }} className="hover:text-[#4ADE80] transition-colors">Integration</a>
             <span>·</span>
-            <a href="#security" className="hover:text-[#4ADE80] transition-colors">Security</a>
+            <a href="#security" onClick={(e) => { e.preventDefault(); scrollToSection('security'); }} className="hover:text-[#4ADE80] transition-colors">Security</a>
             <span>·</span>
-            <a href="#pricing" className="hover:text-[#4ADE80] transition-colors">Pricing</a>
+            <a href="#pricing" onClick={(e) => { e.preventDefault(); scrollToSection('pricing'); }} className="hover:text-[#4ADE80] transition-colors">Pricing</a>
           </div>
           <div className="font-mono text-xs font-bold text-gray-500 uppercase tracking-widest">
             © 2026 · Karachi, Pakistan

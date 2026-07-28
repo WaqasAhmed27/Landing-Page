@@ -7,6 +7,8 @@ interface BrutalButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement
   className?: string;
   baseShadow?: string;
   type?: "button" | "submit" | "reset";
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
+  disabled?: boolean;
 }
 
 export default function BrutalButton({ children, className = '', baseShadow = '4px 4px 0px 0px rgba(0,0,0,1)', ...props }: BrutalButtonProps) {
