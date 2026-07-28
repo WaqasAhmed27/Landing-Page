@@ -65,7 +65,7 @@ export default function App() {
 
     try {
       const customApiUrl = import.meta.env.VITE_CONTACT_API_URL;
-      const web3Key = import.meta.env.VITE_WEB3FORMS_KEY;
+      const web3Key = import.meta.env.VITE_WEB3FORMS_KEY || "ee801c37-12bb-4c05-9cfb-5005251451bd";
 
       let res: Response;
       if (customApiUrl) {
@@ -77,27 +77,12 @@ export default function App() {
             submittedAt: new Date().toISOString(),
           }),
         });
-      } else if (web3Key) {
+      } else {
         res = await fetch("https://api.web3forms.com/submit", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             access_key: web3Key,
-            subject: `New TapTile Lead: ${formData.businessName}`,
-            from_name: "TapTile Landing Page",
-            business_name: formData.businessName,
-            contact_email: formData.email,
-            city: formData.city || "N/A",
-            pos_software: formData.posSoftware || "N/A",
-          }),
-        });
-      } else {
-        // Default Web3Forms key submission fallback or demo log
-        res = await fetch("https://api.web3forms.com/submit", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            access_key: "00000000-0000-0000-0000-000000000000", // Placeholder until VITE_WEB3FORMS_KEY is added
             subject: `New TapTile Lead: ${formData.businessName}`,
             from_name: "TapTile Landing Page",
             business_name: formData.businessName,
