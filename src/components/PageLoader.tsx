@@ -4,10 +4,17 @@ import { useGSAP } from '@gsap/react';
 
 export default function PageLoader() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const previousOverflowRef = useRef("");
   const [isComplete, setIsComplete] = useState(false);
 
   useGSAP(() => {
     if (!containerRef.current) return;
+
+    previousOverflowRef.current = document.body.style.overflow;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setIsComplete(true);
+      return;
+    }
     
     const panels = gsap.utils.toArray('.shutter-panel', containerRef.current);
     
@@ -16,7 +23,7 @@ export default function PageLoader() {
     
     const tl = gsap.timeline({
       onComplete: () => {
-        document.body.style.overflow = '';
+        document.body.style.overflow = previousOverflowRef.current;
         setIsComplete(true);
       }
     });
@@ -33,6 +40,11 @@ export default function PageLoader() {
     })
     // Hide container at the very end of the timeline
     .set(containerRef.current, { autoAlpha: 0 }); 
+
+    return () => {
+      tl.kill();
+      document.body.style.overflow = previousOverflowRef.current;
+    };
     
   }, { scope: containerRef });
 

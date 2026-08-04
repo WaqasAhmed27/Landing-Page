@@ -1,4 +1,4 @@
-import React, { useState, useRef, RefObject } from "react";
+import React, { useEffect, useState, useRef, RefObject } from "react";
 import { Check, Menu, X, Plus, Droplet, Recycle, Trees, ArrowRight, Smartphone, Nfc, QrCodeIcon } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -43,6 +43,34 @@ export default function App() {
   });
   const [formStatus, setFormStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [formErrorMessage, setFormErrorMessage] = useState("");
+
+  useEffect(() => {
+    if (!mobileMenuOpen || window.innerWidth >= 768) return;
+
+    const previousOverflow = document.body.style.overflow;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setMobileMenuOpen(false);
+        mobileMenuButtonRef.current?.focus();
+      }
+    };
+
+    document.body.style.overflow = "hidden";
+    document.addEventListener("keydown", handleKeyDown);
+
+    const firstMenuLink = document.querySelector<HTMLElement>("#mobile-menu a");
+    firstMenuLink?.focus();
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [mobileMenuOpen]);
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => ScrollTrigger.refresh());
+    return () => window.cancelAnimationFrame(frame);
+  }, [faqOpen]);
 
   const scrollToSection = (id: string) => {
     const el = document.getElementById(id);
@@ -92,6 +120,7 @@ export default function App() {
   
   const stickyContainerRef = useRef<HTMLDivElement>(null);
   const howItWorksRef = useRef<HTMLElement>(null);
+  const mobileMenuButtonRef = useRef<HTMLButtonElement>(null);
   const rightStripMaskRef = useRef<HTMLDivElement>(null);
   const pillRefs = useRef<(HTMLDivElement | null)[]>([]);
   
@@ -109,6 +138,58 @@ export default function App() {
   const blobEffectRef = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (!reducedMotion) {
+      const revealItems = gsap.utils.toArray<HTMLElement>(".motion-reveal");
+      revealItems.forEach((item, index) => {
+        gsap.fromTo(item,
+          { autoAlpha: 0, y: 26 },
+          {
+            autoAlpha: 1,
+            y: 0,
+            duration: 0.7,
+            delay: Math.min(index * 0.04, 0.24),
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: item,
+              start: "top 88%",
+              once: true,
+            },
+          }
+        );
+      });
+
+      gsap.to(".landing-hero-art", {
+        yPercent: -5,
+        rotate: 1,
+        ease: "none",
+        scrollTrigger: {
+          trigger: ".landing-hero",
+          start: "top top",
+          end: "bottom top",
+          scrub: 1,
+        },
+      });
+
+      gsap.to(".motion-scrub-line", {
+        scaleX: 1,
+        transformOrigin: "left center",
+        ease: "none",
+        scrollTrigger: {
+          trigger: ".motion-scrub-line",
+          start: "top 90%",
+          end: "top 55%",
+          scrub: true,
+        },
+      });
+    }
+
+    if (reducedMotion) {
+      gsap.set(".motion-reveal, .hiw-card", { clearProps: "all", autoAlpha: 1 });
+      return;
+    }
+
     // 1. Progress Bar (Desktop only)
     gsap.to(progressBarRef.current, {
       width: "100%",
@@ -140,7 +221,7 @@ export default function App() {
 
     // 3. Problem with Paper Cards (Desktop)
     const mm = gsap.matchMedia();
-    mm.add("(min-width: 768px)", () => {
+    mm.add("(min-width: 768px) and (prefers-reduced-motion: no-preference)", () => {
       const elements = [card1Ref.current, card2Ref.current, card3Ref.current, footerRef.current];
       const nums = [
         { ref: num1Ref, val: 41.5, unit: 'B', fmt: (v: number) => v.toFixed(1) },
@@ -199,7 +280,7 @@ export default function App() {
       });
     });
     
-    mm.add("(max-width: 767px)", () => {
+    mm.add("(max-width: 767px) and (prefers-reduced-motion: no-preference)", () => {
        const elements = [card1Ref.current, card2Ref.current, card3Ref.current, footerRef.current];
        elements.forEach(el => el && gsap.set(el, { clearProps: "all" }));
        if (num1Ref.current) num1Ref.current.textContent = '41.5B';
@@ -281,7 +362,7 @@ export default function App() {
     // 7. Cursor Blob Follower & Liquid Deformation
     const blob = blobRef.current;
     const blobEffect = blobEffectRef.current;
-    if (blob && blobEffect && window.matchMedia("(min-width: 768px)").matches) {
+    if (blob && blobEffect && window.matchMedia("(pointer: fine) and (prefers-reduced-motion: no-preference)").matches) {
       const xTo = gsap.quickTo(blob, "left", { duration: 0.4, ease: "power3" });
       const yTo = gsap.quickTo(blob, "top", { duration: 0.4, ease: "power3" });
 
@@ -374,8 +455,13 @@ export default function App() {
       return () => {
         window.removeEventListener("mousemove", onMouseMove);
         gsap.ticker.remove(updateBlob);
+        mm.revert();
       };
     }
+
+    return () => {
+      mm.revert();
+    };
 
   }, { scope: appRef });
 
@@ -403,7 +489,7 @@ export default function App() {
   ];
 
   const getCardClasses = (isActive: boolean, baseBg: string, textClass: string = "text-black") => {
-    return `hiw-card relative ${baseBg} border-4 border-black rounded-3xl p-4 sm:p-6 xl:p-8 ${isActive ? 'hiw-card-active' : 'hiw-card-inactive'} ${textClass}`;
+    return `hiw-card motion-hover-card relative ${baseBg} border-4 border-black rounded-3xl p-4 sm:p-6 xl:p-8 ${isActive ? 'hiw-card-active' : 'hiw-card-inactive'} ${textClass}`;
   };
 
   return (
@@ -412,11 +498,11 @@ export default function App() {
       
       {/* RIGHT STRIP - SCROLL PROGRESS */}
       <div 
-        className="fixed right-0 top-0 h-screen hidden xl:flex justify-center pointer-events-none z-0 bg-[#22C55E] overflow-hidden w-64"
+        className="fixed right-0 top-0 h-[100dvh] hidden xl:flex justify-center pointer-events-none z-0 bg-[#22C55E] overflow-hidden w-64"
       >
-        <div className="absolute w-full h-[100vh] flex items-center justify-center">
+        <div className="absolute w-full h-[100dvh] flex items-center justify-center">
           <div 
-            className="w-[100vh] flex items-center text-[#111111] font-mono uppercase leading-[0.8] font-black opacity-[0.12] whitespace-nowrap"
+            className="w-[100dvh] flex items-center text-[#111111] font-mono uppercase leading-[0.8] font-black opacity-[0.12] whitespace-nowrap"
             style={{ transform: 'rotate(-90deg)', fontSize: '12rem' }}
           >
             <div className="animate-marquee flex">
@@ -426,9 +512,9 @@ export default function App() {
           </div>
         </div>
         <div ref={rightStripMaskRef} className="absolute bottom-0 w-full overflow-hidden flex justify-center" style={{ height: '0%' }}>
-          <div className="absolute bottom-0 w-full h-[100vh] flex items-center justify-center">
+          <div className="absolute bottom-0 w-full h-[100dvh] flex items-center justify-center">
             <div 
-              className="w-[100vh] flex items-center text-[#111111] font-mono uppercase leading-[0.8] font-black opacity-100 whitespace-nowrap"
+              className="w-[100dvh] flex items-center text-[#111111] font-mono uppercase leading-[0.8] font-black opacity-100 whitespace-nowrap"
               style={{ transform: 'rotate(-90deg)', fontSize: '12rem' }}
             >
               <div className="animate-marquee flex">
@@ -446,7 +532,7 @@ export default function App() {
       </div>
       
       {trailEnabled && <TrailCanvas />}
-      <div className="landing-canvas w-full xl:max-w-[calc(100vw-16rem)] ml-0 border-r-4 border-black bg-[#FDFBEE] min-h-screen relative shadow-2xl md:cursor-none">
+      <div className="landing-canvas cursor-fine-none w-full xl:max-w-[calc(100vw-16rem)] ml-0 border-r-4 border-black bg-[#FDFBEE] min-h-screen relative shadow-2xl">
         {/* Yellow Trailing Effect Blob */}
         <div 
           ref={blobEffectRef} 
@@ -500,7 +586,7 @@ export default function App() {
             </BrutalButton>
           </div>
 
-          <button className="md:hidden" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+          <button className="md:hidden rounded-lg p-2 transition-transform hover:bg-[#FFF248] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#4ADE80]" aria-expanded={mobileMenuOpen} aria-controls="mobile-menu" aria-label={mobileMenuOpen ? "Close menu" : "Open menu"} onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
             {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
           </button>
         </div>
@@ -508,7 +594,7 @@ export default function App() {
 
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
-        <div className="md:hidden absolute top-20 left-0 w-full bg-[#FDFBEE] border-b-4 border-black z-40 px-5 py-5 flex flex-col gap-4 shadow-[0_8px_0_0_rgba(0,0,0,1)]">
+        <div id="mobile-menu" className="motion-mobile-menu md:hidden absolute top-20 left-0 w-full bg-[#FDFBEE] border-b-4 border-black z-40 px-5 py-5 flex flex-col gap-4 shadow-[0_8px_0_0_rgba(0,0,0,1)]">
           <a href="#platform" className="font-bold text-lg hover:text-[#4ADE80] transition-colors" onClick={(e) => { e.preventDefault(); scrollToSection('platform'); }}>Platform</a>
           <a href="#integration" className="font-bold text-lg hover:text-[#4ADE80] transition-colors" onClick={(e) => { e.preventDefault(); scrollToSection('integration'); }}>Integration</a>
           <a href="#security" className="font-bold text-lg hover:text-[#4ADE80] transition-colors" onClick={(e) => { e.preventDefault(); scrollToSection('security'); }}>Security</a>
@@ -530,21 +616,21 @@ export default function App() {
     </div>
         
         <div>
-          <div className="inline-block bg-[#4ADE80] border-2 border-black px-3 py-1 rounded-full shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] font-bold text-xs uppercase tracking-wider mb-8">
+          <div className="motion-reveal inline-block bg-[#4ADE80] border-2 border-black px-3 py-1 rounded-full shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] font-bold text-xs uppercase tracking-wider mb-8">
             A smarter little after-checkout ritual
           </div>
-          <h1 className="landing-title font-syne text-[2.25rem] sm:text-[3rem] lg:text-[3.5rem] font-extrabold leading-[1] tracking-tight mb-8 relative z-10">
+          <h1 className="motion-reveal landing-title font-syne text-[2.25rem] sm:text-[3rem] lg:text-[3.5rem] font-extrabold leading-[1] tracking-tight mb-8 relative z-10">
             Digital receipts.<br />
             <span className="text-[#4ADE80] relative inline-block">
               Zero POS changes.
-              <div className="chalk-swoop absolute -bottom-1 sm:-bottom-3 -left-4 sm:-left-6 w-[105%] sm:w-[110%] h-3 sm:h-4 bg-[#FFF248] border-[3px] border-black rounded-full -rotate-2 -z-10 hover:skew-x-6 hover:-rotate-1 transition-all duration-300"></div>
+              <div className="chalk-circle motion-chalk-circle -z-10" aria-hidden="true"></div>
             </span>
           </h1>
-          <p className="text-lg font-medium text-gray-700 mb-10 max-w-lg leading-relaxed">
+          <p className="motion-reveal text-lg font-medium text-gray-700 mb-10 max-w-lg leading-relaxed">
             One tap delivers a digital receipt to your customer in under two seconds — no app, no POS changes, no workflow friction. Live in under 48 hours.
           </p>
           
-          <div className="flex flex-wrap gap-4 mb-12">
+          <div className="motion-reveal flex flex-wrap gap-4 mb-12">
             <div className="flex flex-col items-start justify-center border-2 border-black bg-white rounded-lg py-3 px-4 flex-1 min-w-[90px] sm:w-[120px] sm:flex-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[4px_6px_0px_0px_rgba(0,0,0,1)] transition-all">
               <span className="text-sm font-mono font-bold text-[#4ADE80] leading-none mb-2">0 POS</span>
               <span className="text-[11px] font-bold uppercase tracking-wider text-black leading-none">Changes</span>
@@ -559,7 +645,7 @@ export default function App() {
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+          <div className="motion-reveal flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
             <BrutalButton onClick={() => scrollToSection('integration')} className="w-full sm:w-auto bg-[#4ADE80] text-black font-bold px-4 py-2.5 text-sm rounded-md border-2 border-black uppercase text-sm tracking-wider" baseShadow="4px 4px 0px 0px rgba(0,0,0,1)">
               See It In Action
             </BrutalButton>
@@ -570,49 +656,46 @@ export default function App() {
           <p className="mt-6 text-sm font-bold text-gray-500 uppercase tracking-wider">Your brand will be shown here when we go live.</p>
         </div>
 
-        <div className="landing-hero-art relative h-[300px] sm:h-[380px] w-full mt-4 sm:mt-12 lg:mt-0 flex justify-center items-center">
+        <div className="motion-reveal landing-hero-art relative h-[300px] sm:h-[380px] w-full mt-4 sm:mt-12 lg:mt-0 flex justify-center items-center">
           <div className="relative w-full max-w-[450px] h-full flex justify-center items-center scale-[0.75] min-[380px]:scale-[0.85] sm:scale-100 origin-center">
             
             {/* Receipt Mockup */}
-            <div className="absolute z-10 w-44 md:w-48 bg-white border-4 border-black rounded-xl p-5 shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] left-0 top-10">
-              <div className="text-center pb-3 border-b-2 border-dashed border-gray-300">
-                  <p className="font-syne font-bold text-sm">YOUR BRAND HERE</p>
-                  <p className="font-mono text-[10px] text-gray-500 mt-1">COUNTER PREVIEW</p>
+            <div className="hero-receipt absolute z-10 font-mono">
+              <div className="hero-receipt-header">
+                <p className="font-syne text-sm font-bold leading-tight">YOUR BRAND<br />HERE</p>
+                <p className="mt-2 text-[10px] text-gray-500">COUNTER PREVIEW</p>
               </div>
-              <div className="py-4 font-mono text-xs space-y-3 border-b-2 border-dashed border-gray-300">
-                <div className="flex justify-between"><span>Organic Honey 500g</span><span>1,250</span></div>
-                <div className="flex justify-between"><span>Basmati Rice 5kg</span><span>1,850</span></div>
-                <div className="flex justify-between"><span>Full Cream Milk x4</span><span>1,160</span></div>
+              <div className="hero-receipt-items">
+                <div className="hero-receipt-item"><span>Organic Honey<br />500g</span><span>1,250</span></div>
+                <div className="hero-receipt-item"><span>Basmati Rice<br />5kg</span><span>1,850</span></div>
+                <div className="hero-receipt-item"><span>Full Cream<br />Milk x4</span><span>1,160</span></div>
               </div>
-              <div className="py-3 flex justify-between font-syne font-bold text-lg">
-                <span>TOTAL DUE</span><span>5,978.7</span>
-              </div>
+              <div className="hero-receipt-total"><span>TOTAL<br />DUE</span><span>5,978.7</span></div>
             </div>
 
-            {/* Blinking Dots */}
-            <div className="absolute z-15 left-[55%] md:left-[58%] top-1/2 -translate-y-1/2 flex gap-2">
-              <div className="w-2.5 h-2.5 bg-black rounded-full animate-[pulse_1.5s_infinite]"></div>
-              <div className="w-2.5 h-2.5 bg-black rounded-full animate-[pulse_1.5s_0.5s_infinite]"></div>
-              <div className="w-2.5 h-2.5 bg-black rounded-full animate-[pulse_1.5s_1s_infinite]"></div>
+            {/* Parallel handoff */}
+            <div className="hero-flow" aria-hidden="true">
+              <div className="hero-flow-dots"><span /><span /><span /></div>
+              <span className="hero-flow-label">PRINT → DIGITAL</span>
             </div>
             
             {/* Phone Mockup */}
-            <div className="absolute z-20 w-32 h-[260px] bg-[#111111] border-4 border-black rounded-[2rem] p-1.5 right-0 md:-right-8 top-24 shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] flex flex-col justify-center items-center">
-              <div className="absolute top-1.5 w-16 h-4 bg-black rounded-b-xl z-30"></div>
-              <div className="w-full h-full bg-white rounded-2xl overflow-hidden p-4 flex flex-col items-center justify-center border-2 border-black">
+            <div className="hero-phone absolute z-20 flex flex-col items-center justify-center">
+              <div className="hero-phone-notch" />
+              <div className="hero-phone-screen">
                  <div className="bg-[#dcfce7] border-2 border-black rounded-lg p-2 text-black font-bold text-xs uppercase mb-4 w-full flex items-center justify-center gap-2">
-                   <Check size={14} className="text-[#4ADE80]" /> ✓ Received
+                   <Check size={14} className="text-[#4ADE80]" /> Received
                  </div>
                  <p className="font-mono text-[10px] text-center font-bold leading-relaxed">
                    TAPTILE RECEIPT<br/><br/>
                    TOTAL: 5,978.7 PKR<br/><br/>
-                   SAVED & SEARCHABLE
+                   Easy returns<br/>Fully Organized
                  </p>
               </div>
             </div>
             
             {/* NFC Icon */}
-            <div className="absolute z-30 bottom-10 right-[90px] w-14 h-14 bg-[#4ADE80] rounded-full border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center">
+            <div className="hero-nfc absolute z-30 flex items-center justify-center">
               <Nfc size={28} className="text-black" />
             </div>
           </div>
@@ -646,7 +729,7 @@ export default function App() {
       </div>
     </div>
         {/* Sticky viewport content container */}
-        <div className="relative md:sticky top-0 h-auto md:h-screen w-full flex flex-col justify-center py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-8 lg:px-12">
+        <div className="relative md:sticky top-0 h-auto md:h-[100dvh] w-full flex flex-col justify-center py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-8 lg:px-12">
           
           <div className="max-w-[85rem] mx-auto w-full">
             <div className="flex justify-center mb-6 sm:mb-8 md:mb-12">
@@ -751,7 +834,7 @@ export default function App() {
             <div className="inline-block bg-white border-2 border-black text-black px-3 py-1 rounded-full font-bold text-xs uppercase tracking-wider mb-6">
               Step 02
             </div>
-            <h3 className="font-syne text-2xl lg:text-xl min-[1200px]:text-2xl xl:text-3xl font-extrabold mb-4 break-normal">Intercepted instantly.</h3>
+            <h3 className="font-syne text-2xl lg:text-xl min-[1200px]:text-2xl xl:text-3xl font-extrabold mb-4 break-normal">Intercept instantly.</h3>
             <p className="text-sm sm:text-base xl:text-lg font-medium text-gray-800">Our middleware reads the print job in parallel. The receipt prints on paper and triggers the digital version simultaneously.</p>
           </div>
 
@@ -855,26 +938,26 @@ export default function App() {
         </p>
 
         <div className="flex flex-col lg:flex-row items-stretch justify-between gap-4">
-          <div className="flex-1 bg-white border-4 border-black rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center flex flex-col justify-center">
-            <h4 className="font-syne font-bold text-lg mb-2">Billing Software</h4>
-            <span className="font-mono text-[10px] uppercase font-bold text-gray-500">ESC/POS</span>
-          </div>
-          <div className="flex-1 bg-black text-white border-4 border-black rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center flex flex-col justify-center">
-            <h4 className="font-syne font-bold text-lg mb-2">Middleware Agent</h4>
-            <span className="font-mono text-[10px] uppercase font-bold text-gray-400">JSON</span>
-          </div>
-          <div className="flex-1 bg-white border-4 border-black rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center flex flex-col justify-center">
-            <h4 className="font-syne font-bold text-lg mb-2">ESC/POS Parser</h4>
-            <span className="font-mono text-[10px] uppercase font-bold text-gray-500">HTTPS</span>
-          </div>
-          <div className="flex-1 bg-[#4ADE80] border-4 border-black rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center flex flex-col justify-center">
-            <h4 className="font-syne font-bold text-lg mb-2">Counter Device</h4>
-            <span className="font-mono text-[10px] uppercase font-bold text-black">NFC + QR</span>
-          </div>
-          <div className="flex-1 bg-[#4ADE80] border-4 border-black rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center flex flex-col justify-center">
-            <h4 className="font-syne font-bold text-lg mb-2">Customer Phone</h4>
-            <span className="font-mono text-[10px] uppercase font-bold text-black">Browser</span>
-          </div>
+           <div className="flex-1 bg-white border-4 border-black rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center flex flex-col justify-center">
+             <h4 className="font-syne font-bold text-lg mb-2">Billing Software</h4>
+             <span className="font-mono text-[10px] uppercase font-bold text-gray-500">Stays the same</span>
+           </div>
+           <div className="flex-1 bg-white text-black border-4 border-black rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center flex flex-col justify-center">
+             <h4 className="font-syne font-bold text-lg mb-2">The Counter</h4>
+             <span className="font-mono text-[10px] uppercase font-bold text-gray-500">Keeps moving</span>
+           </div>
+           <div className="flex-1 bg-black text-white border-4 border-black rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center flex flex-col justify-center">
+             <h4 className="font-syne font-bold text-lg mb-2">TapTile</h4>
+             <span className="font-mono text-[10px] uppercase font-bold text-gray-400">The smart bridge</span>
+           </div>
+           <div className="flex-1 bg-[#4ADE80] border-4 border-black rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center flex flex-col justify-center">
+             <h4 className="font-syne font-bold text-lg mb-2">Your Customer</h4>
+             <span className="font-mono text-[10px] uppercase font-bold text-black">A better handoff</span>
+           </div>
+           <div className="flex-1 bg-[#4ADE80] border-4 border-black rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center flex flex-col justify-center">
+             <h4 className="font-syne font-bold text-lg mb-2">After Checkout</h4>
+             <span className="font-mono text-[10px] uppercase font-bold text-black">Starts here</span>
+           </div>
         </div>
         </div>
       </section>
@@ -1068,7 +1151,10 @@ export default function App() {
         <div className="space-y-4">
           {faqs.map((faq, i) => (
             <div key={i} className="bg-white border-4 border-black rounded-2xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
-              <button 
+              <button
+                id={`faq-question-${i}`}
+                aria-expanded={faqOpen === i}
+                aria-controls={`faq-answer-${i}`}
                 className="w-full px-4 py-4 sm:px-8 sm:py-6 flex justify-between items-center text-left font-bold text-base sm:text-lg hover:bg-[#4ADE80] group transition-colors cursor-pointer"
                 onClick={() => setFaqOpen(faqOpen === i ? null : i)}
               >
@@ -1078,7 +1164,7 @@ export default function App() {
                 </span>
               </button>
               {faqOpen === i && (
-                <div className="px-4 pb-4 sm:px-8 sm:pb-6 text-gray-700 font-medium border-t-2 border-gray-100 pt-4 text-sm sm:text-lg">
+                <div id={`faq-answer-${i}`} role="region" aria-labelledby={`faq-question-${i}`} className="px-4 pb-4 sm:px-8 sm:pb-6 text-gray-700 font-medium border-t-2 border-gray-100 pt-4 text-sm sm:text-lg">
                   {faq.a}
                 </div>
               )}

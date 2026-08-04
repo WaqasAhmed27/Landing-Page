@@ -10,6 +10,7 @@ export default function TrailCanvas() {
   const currentIndex = useRef(0);
   const highestZIndex = useRef(100);
   const containerRef = useRef<HTMLDivElement>(null);
+  const timeoutIds = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   // Core physics parameters requested by user
   const DISTANCE_THRESHOLD = 30; // Min distance threshold
@@ -45,14 +46,17 @@ export default function TrailCanvas() {
     });
 
     // Handle lifespan expiry by triggering removal
-    setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       // Instead of abruptly removing, we let the exit animation complete first.
       // But the enter animation takes care of the exit. We'll clean up state anyway.
       setImages(prev => prev.filter(img => img.id !== id));
     }, LIFESPAN);
+    timeoutIds.current.push(timeoutId);
   };
 
   useEffect(() => {
+    if (!window.matchMedia("(pointer: fine) and (prefers-reduced-motion: no-preference)").matches) return;
+
     const handleGlobalMove = (clientX: number, clientY: number) => {
       const dist = Math.hypot(clientX - lastMousePos.current.x, clientY - lastMousePos.current.y);
 
@@ -62,21 +66,17 @@ export default function TrailCanvas() {
       }
     };
 
-    const onMouseMove = (e: MouseEvent) => {
+    const onPointerMove = (e: PointerEvent) => {
+      if (e.pointerType !== "mouse") return;
       handleGlobalMove(e.clientX, e.clientY);
     };
 
-    const onTouchMove = (e: TouchEvent) => {
-      if (e.touches.length === 0) return;
-      handleGlobalMove(e.touches[0].clientX, e.touches[0].clientY);
-    };
-
-    window.addEventListener('mousemove', onMouseMove);
-    window.addEventListener('touchmove', onTouchMove);
+    window.addEventListener('pointermove', onPointerMove, { passive: true });
 
     return () => {
-      window.removeEventListener('mousemove', onMouseMove);
-      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('pointermove', onPointerMove);
+      timeoutIds.current.forEach(clearTimeout);
+      timeoutIds.current = [];
     };
   }, []);
 

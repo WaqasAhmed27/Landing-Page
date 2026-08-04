@@ -70,7 +70,7 @@ export default function BrutalButton({ children, className = '', baseShadow = '4
     <button
       ref={buttonRef}
       style={{ boxShadow: baseShadow }}
-      className={`transition-none cursor-pointer ${className}`}
+      className={`motion-button transition-none cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#FFF248] active:scale-[0.98] ${className}`}
       {...props}
     >
       {children}
