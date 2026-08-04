@@ -24,7 +24,7 @@ export default function ComingSoon() {
   };
 
   return (
-    <main className="coming-soon-page relative min-h-[100dvh] overflow-hidden bg-[#FDFBEE] text-[#111111] font-sans selection:bg-[#4ADE80] selection:text-black lg:h-[100dvh] lg:min-h-0">
+    <main className="coming-soon-page relative min-h-[100dvh] w-full max-w-[100vw] overflow-x-hidden bg-[#FDFBEE] text-[#111111] font-sans selection:bg-[#4ADE80] selection:text-black lg:h-[100dvh] lg:min-h-0">
       <div className="pointer-events-none absolute inset-0 opacity-40 [background-image:linear-gradient(#111111_1px,transparent_1px),linear-gradient(90deg,#111111_1px,transparent_1px)] [background-size:42px_42px] [mask-image:linear-gradient(to_bottom,black,transparent_80%)]" />
       <div className="pointer-events-none absolute -right-28 top-16 h-72 w-72 rounded-full border-[3px] border-black/10 sm:h-[28rem] sm:w-[28rem]" />
       <div className="pointer-events-none absolute -left-24 bottom-10 h-56 w-56 rounded-full border-[3px] border-black/10" />
@@ -50,7 +50,7 @@ export default function ComingSoon() {
             A small secret is loading
           </div>
 
-          <h1 className="coming-soon-title font-syne text-[clamp(3.25rem,8vw,7.9rem)] font-extrabold leading-[0.86] tracking-[-0.07em] lg:text-[clamp(3.8rem,5.15vw,6.2rem)]">
+          <h1 className="coming-soon-title font-syne text-[clamp(2.15rem,11.5vw,7.9rem)] font-extrabold leading-[0.86] tracking-[-0.07em] lg:text-[clamp(3.8rem,5.15vw,6.2rem)]">
             <span className="block whitespace-nowrap">The next</span>
             <span className="little-highlight relative block w-fit whitespace-nowrap text-[#22C55E] [text-shadow:3px_3px_0_#111111]">
               Little
@@ -85,7 +85,7 @@ export default function ComingSoon() {
           </div>
         </div>
 
-        <div className="coming-soon-lab relative mx-auto w-full max-w-[560px] lg:justify-self-end">
+        <div className="coming-soon-lab relative mx-auto w-full max-w-[560px] px-1.5 sm:px-0 lg:justify-self-end">
           <div className="absolute -right-1 top-0 z-20 hidden w-32 -rotate-6 rounded-lg border-[3px] border-black bg-[#FFF248] px-3 py-2 text-center font-mono text-[10px] font-black uppercase leading-tight shadow-[5px_5px_0_#111111] sm:block lg:-right-5 lg:top-6">
             Something<br />is hiding here
           </div>
@@ -94,7 +94,7 @@ export default function ComingSoon() {
             <div className="absolute -left-5 -top-8 w-20 -rotate-12 sm:-left-10 sm:-top-10 sm:w-28">
               <img src={confetti} alt="" className="w-full object-contain" />
             </div>
-            <div className="absolute -bottom-8 -right-8 w-20 rotate-12 sm:-bottom-12 sm:-right-12 sm:w-28">
+            <div className="absolute -bottom-6 -right-3 w-16 rotate-12 sm:-bottom-12 sm:-right-12 sm:w-28">
               <img src={coin} alt="" className="w-full object-contain" />
             </div>
 
