@@ -92,44 +92,14 @@ export default function LandingPage() {
     setFormErrorMessage("");
 
     try {
-      const web3FormsKey = import.meta.env.VITE_WEB3FORMS_KEY;
-      const customApiUrl = import.meta.env.VITE_CONTACT_API_URL;
-
-      let res;
-      if (web3FormsKey) {
-        res = await fetch("https://api.web3forms.com/submit", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Accept: "application/json" },
-          body: JSON.stringify({
-            access_key: web3FormsKey,
-            subject: `New TapTile Pilot Request: ${formData.businessName}`,
-            from_name: "TapTile Landing Page",
-            name: formData.businessName,
-            email: formData.email,
-            city: formData.city || "N/A",
-            pos_software: formData.posSoftware || "N/A",
-          }),
-        });
-      } else if (customApiUrl) {
-        res = await fetch(customApiUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            ...formData,
-            submittedAt: new Date().toISOString(),
-          }),
-        });
-      } else {
-        // Direct call to local API
-        res = await fetch("/api/waitlist", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            ...formData,
-            submittedAt: new Date().toISOString(),
-          }),
-        });
-      }
+      const res = await fetch("/api/waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
+          submittedAt: new Date().toISOString(),
+        }),
+      });
 
       const data = await res.json().catch(() => ({}));
       if (!res.ok || (data && data.success === false)) {

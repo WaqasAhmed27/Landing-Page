@@ -26,7 +26,7 @@ export async function onRequestPost(context) {
       },
       body: JSON.stringify({
         from: 'TapTile Waitlist <onboarding@resend.dev>', // Needs to be a verified domain in prod
-        to: ['hello@taptile.pk'], // Replace with actual admin email
+        to: ['taptilepk@gmail.com'], // Sandbox accounts must send to their verified email
         subject: `New Waitlist Signup: ${businessName}`,
         html: `
           <h2>New TapTile Waitlist Request</h2>
