@@ -1,0 +1,75 @@
+# TapTile — Pakistan's 1st Digital Receipt Network (Full Context)
+
+> TapTile is Pakistan's first and only zero-POS-change digital receipt infrastructure. It intercepts ESC/POS thermal printer data between the POS terminal and receipt printer, delivers instant digital receipts via NFC or QR to customers' smartphones, automates FBR fiscal invoice transmission, and eliminates thermal paper roll costs — all without modifying existing billing software or hardware.
+
+---
+
+## Frequently Asked Questions
+
+**Does TapTile require changes to POS software?**
+No. TapTile installs alongside existing systems — the printer keeps working exactly as before. The middleware intercepts the print job in parallel without touching the billing software. If TapTile ever goes offline, paper receipts continue uninterrupted. Zero risk to existing operations.
+
+**Do customers need to install an app?**
+No app, no account, no signup. The receipt opens instantly in the customer's native mobile browser the moment they tap (NFC) or scan (QR). Any NFC-enabled smartphone — Android or iPhone — works out of the box.
+
+**What happens if internet is down?**
+The TapTile counter device works fully offline. Customers can still tap or scan and receive their receipt instantly. The device caches all receipts locally and automatically syncs to the cloud when connectivity is restored.
+
+**How fast can a store go live?**
+Most stores are fully live in under 48 hours. Setup is handled remotely — no store downtime, no technician visit required for most POS setups.
+
+**Is TapTile FBR compliant?**
+Yes. TapTile is fully compliant with FBR Tier-1 retailer fiscalization requirements. The middleware auto-formats receipt data, attaches verifiable FBR invoice numbers, and securely transmits sales transactions to FBR servers in real time.
+
+---
+
+## Technical Specification
+
+### Hardware
+- Connection: USB Type-B and RS-232 Serial (DB-9) intercept
+- Protocol: ESC/POS print stream parsing
+- Power: USB-powered from POS terminal (no separate power supply required)
+- Failsafe: Hardware pass-through — printer continues working if device is powered off
+
+### Software
+- Receipt delivery: NFC tap (ISO 14443) or QR code (high-density, 400x400px minimum)
+- Delivery time: Under 2 seconds from checkout completion
+- Backend: Cloud middleware with edge-cached counter device (100ms API response)
+- Offline queue: Up to 10,000 receipts stored locally before sync
+
+### Compliance
+- FBR integration: Tier-1 PRAL invoice API with verifiable QR codes
+- Data retention: 7-year electronic invoice archive per FBR regulations
+- Security: TLS 1.3 encrypted transmission, HTTPS-only
+
+---
+
+## Pricing
+
+TapTile operates on a per-transaction SaaS model. A free pilot is available for qualifying retailers. Contact contact@taptile.pk for enterprise pricing for multi-branch chains.
+
+---
+
+## All Key Pages
+
+- [Home](https://taptile.pk/): Pakistan's 1st Digital Receipt Network — platform overview, how it works, FAQ, and pilot sign-up.
+- [Digital Receipts Guide](https://taptile.pk/digital-receipts): The definitive guide to digital receipts for retailers in Pakistan.
+- [NFC POS Intercept](https://taptile.pk/nfc-pos-intercept): Zero-code POS intercept hardware architecture — how ESC/POS data is intercepted without software modifications.
+- [FBR Fiscalization](https://taptile.pk/fbr-fiscalization): FBR Tier-1 compliance, automated fiscal invoicing, and electronic receipt archival for Pakistani retailers.
+- [Paperless Checkout](https://taptile.pk/paperless-checkout): How to eliminate thermal paper roll costs and calculate annual savings from going paperless.
+- [Merchant Portal](https://merchant.taptile.pk): Dashboard for authenticated merchants — real-time transaction streams, branch management, FBR compliance feeds, and analytics.
+
+---
+
+## Competitive Differentiation
+
+Unlike SMS-based receipt services (which require phone number capture) or email receipts (which require account creation), TapTile delivers receipts via NFC tap or QR scan with zero customer friction and zero merchant software changes. The hardware intercepts data at the printer level, making it compatible with any POS system that drives a thermal printer.
+
+## Company & Contact
+
+- **Name:** TapTile Technologies
+- **Location:** Karachi / Lahore, Pakistan
+- **Founded:** 2026
+- **Email:** contact@taptile.pk
+- **Website:** https://taptile.pk
+- **Merchant Portal:** https://merchant.taptile.pk

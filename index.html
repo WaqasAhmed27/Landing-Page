@@ -3,30 +3,137 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    
+
     <!-- Primary Meta Tags -->
-    <title>TapTile — Pakistan's 1st Digital Receipt Network</title>
-    <meta name="title" content="TapTile — Pakistan's 1st Digital Receipt Network" />
-    <meta name="description" content="One tap delivers a digital receipt to your customer in under two seconds — zero POS changes, zero paper, live in under 48 hours. Built for retail across Pakistan." />
-    <meta name="keywords" content="TapTile, Digital Receipt, Pakistan Retail, FBR Compliant, NFC Receipt, QR Receipt, Paperless Retail, POS Integration" />
+    <title>TapTile - Pakistan's 1st Digital Receipt Network</title>
+    <meta name="title" content="TapTile - Pakistan's 1st Digital Receipt Network" />
+    <meta name="description" content="One tap delivers a digital receipt in under 2 seconds. Zero POS changes, zero paper, live in 48 hours. Built for retail stores across Pakistan." />
+    <meta name="keywords" content="TapTile, Digital Receipt, Pakistan Retail, FBR Compliant, NFC Receipt, QR Receipt, Paperless Retail, POS Integration, ESC/POS Intercept" />
     <meta name="author" content="TapTile Technologies" />
-    <link rel="canonical" href="https://taptile.pk" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://taptile.pk/" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
     <!-- Open Graph / Facebook / WhatsApp -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://taptile.pk/" />
     <meta property="og:site_name" content="TapTile" />
-    <meta property="og:title" content="TapTile — Pakistan's 1st Digital Receipt Network" />
+    <meta property="og:title" content="TapTile - Pakistan's 1st Digital Receipt Network" />
     <meta property="og:description" content="Zero POS changes. 100% paperless receipts delivered instantly via NFC and QR. Live in under 48 hours." />
     <meta property="og:image" content="https://taptile.pk/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="TapTile Digital Receipt Network - Pakistan's first NFC POS receipt platform" />
+    <meta property="og:locale" content="en_PK" />
 
     <!-- Twitter Cards -->
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@taptile_pk" />
     <meta name="twitter:url" content="https://taptile.pk/" />
-    <meta name="twitter:title" content="TapTile — Pakistan's 1st Digital Receipt Network" />
+    <meta name="twitter:title" content="TapTile - Pakistan's 1st Digital Receipt Network" />
     <meta name="twitter:description" content="Digital receipts. Zero POS changes. Cut thermal paper roll costs by 85%." />
     <meta name="twitter:image" content="https://taptile.pk/og-image.jpg" />
+    <meta name="twitter:image:alt" content="TapTile Digital Receipt Network - NFC and QR receipt delivery platform for Pakistan retail" />
+
+    <!-- Sitemap reference -->
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
+
+    <!-- JSON-LD Structured Data: Organization + SoftwareApplication + WebSite -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://taptile.pk/#organization",
+          "name": "TapTile Technologies",
+          "url": "https://taptile.pk",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://taptile.pk/favicon.svg",
+            "width": 512,
+            "height": 512
+          },
+          "description": "Pakistan's first zero-POS-change digital receipt network delivering instant NFC and QR receipts for retail merchants.",
+          "foundingDate": "2026",
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Karachi",
+            "addressCountry": "PK"
+          },
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "contactType": "customer support",
+            "email": "contact@taptile.pk",
+            "availableLanguage": ["English", "Urdu"]
+          },
+          "sameAs": [
+            "https://linkedin.com/company/taptile-pk",
+            "https://twitter.com/taptile_pk"
+          ],
+          "knowsAbout": [
+            "Digital Receipts",
+            "NFC POS Intercept",
+            "FBR Fiscalization",
+            "ESC/POS Printer Intercept",
+            "Paperless Retail",
+            "Thermal Paper Cost Reduction"
+          ]
+        },
+        {
+          "@type": "SoftwareApplication",
+          "@id": "https://taptile.pk/#software",
+          "name": "TapTile Digital Receipt Network",
+          "applicationCategory": "BusinessApplication",
+          "applicationSubCategory": "Point of Sale Software",
+          "operatingSystem": "Windows POS, Linux POS, Android POS, Any ESC/POS Thermal Printer",
+          "description": "NFC and QR digital receipt delivery system that intercepts ESC/POS thermal printer data, eliminates paper receipt costs by 85%, and automates FBR fiscal compliance for Pakistani retailers.",
+          "featureList": [
+            "Zero POS software modifications required",
+            "NFC tap receipt delivery under 2 seconds",
+            "QR code receipt scanning",
+            "FBR Tier-1 automatic fiscal invoice transmission",
+            "Offline receipt caching with cloud sync",
+            "Multi-branch management dashboard",
+            "Thermal paper cost elimination"
+          ],
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "PKR",
+            "description": "Free pilot available for qualifying retailers"
+          },
+          "provider": {
+            "@id": "https://taptile.pk/#organization"
+          },
+          "inLanguage": ["en", "ur"],
+          "areaServed": {
+            "@type": "Country",
+            "name": "Pakistan"
+          }
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://taptile.pk/#website",
+          "url": "https://taptile.pk",
+          "name": "TapTile",
+          "description": "Pakistan's first digital receipt network - zero POS changes, instant NFC and QR delivery, FBR compliant.",
+          "publisher": {
+            "@id": "https://taptile.pk/#organization"
+          },
+          "inLanguage": "en-PK",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+              "@type": "EntryPoint",
+              "urlTemplate": "https://taptile.pk/?q={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
+          }
+        }
+      ]
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>

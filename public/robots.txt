@@ -1,0 +1,52 @@
+# TapTile Public Robots Policy
+# Last updated: 2026-08-06
+
+# Default: Allow all legitimate crawlers full access
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+
+# ── AI Search Engine Crawlers ──────────────────────────────────────────────────
+# These crawlers power ChatGPT Search, Google AI Overviews, Perplexity,
+# Apple Intelligence, and Claude Search. Allowing them enables AI-citations
+# for TapTile in Generative Engine Optimization (GEO).
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: FacebookBot
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
+# CCBot is used by Common Crawl which trains many open-source LLMs.
+# Allow to maximise training data coverage for future AI models.
+User-agent: CCBot
+Allow: /
+
+# Bytespider (ByteDance / TikTok) — allow for broader AI coverage
+User-agent: Bytespider
+Allow: /
+
+# ── Sitemap Directive ──────────────────────────────────────────────────────────
+Sitemap: https://taptile.pk/sitemap.xml

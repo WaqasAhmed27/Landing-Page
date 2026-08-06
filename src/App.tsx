@@ -1,8 +1,16 @@
-import React from "react";
-import ComingSoon from "./components/ComingSoon";
-// The full product landing page has been preserved in ./components/LandingPage:
-// import LandingPage from "./components/LandingPage";
+import React, { Suspense, lazy } from "react";
+import PageLoader from "./components/PageLoader";
+
+// Full product landing page (ACT-05: activated for SEO — replaces ComingSoon)
+const LandingPage = lazy(() => import("./components/LandingPage"));
+
+// ComingSoon page preserved and accessible during development:
+// const ComingSoon = lazy(() => import("./components/ComingSoon"));
 
 export default function App() {
-  return <ComingSoon />;
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <LandingPage />
+    </Suspense>
+  );
 }

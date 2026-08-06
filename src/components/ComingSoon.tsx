@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { ArrowUpRight, Check, ScanLine, Sparkles, Waves } from "lucide-react";
-import neobrutalistLogo from "../assets/images/taptile_logo_neobrutalist.png";
-import chameleonThinking from "../assets/images/chameleon_thinking.png";
-import chameleonWink from "../assets/images/trail_images/chameleon_wink.png";
-import coin from "../assets/images/trail_images/coin.png";
-import confetti from "../assets/images/trail_images/confetti.png";
-import lightning from "../assets/images/trail_images/lighning_bolt.png";
+import neobrutalistLogo from "../assets/images/taptile_logo_neobrutalist.webp";
+import chameleonThinking from "../assets/images/chameleon_thinking.webp";
+import chameleonWink from "../assets/images/trail_images/chameleon_wink.webp";
+import coin from "../assets/images/trail_images/coin.webp";
+import confetti from "../assets/images/trail_images/confetti.webp";
+import lightning from "../assets/images/trail_images/lighning_bolt.webp";
 import BrutalButton from "./BrutalButton";
 
 const clues = [
@@ -32,7 +32,7 @@ export default function ComingSoon() {
       <header className="relative z-10 mx-auto flex w-full max-w-[1400px] items-center justify-between px-5 py-5 sm:px-8 sm:py-7 lg:absolute lg:inset-x-0 lg:top-0 lg:px-12 lg:py-4">
         <a href="#top" className="flex items-center gap-3" aria-label="TapTile home">
           <span className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-xl border-[3px] border-black bg-white shadow-[4px_4px_0_#111111] sm:h-12 sm:w-12">
-            <img src={neobrutalistLogo} alt="" className="h-full w-full object-cover" />
+            <img src={neobrutalistLogo} alt="TapTile digital receipt platform logo" className="h-full w-full object-cover" width={48} height={48} />
           </span>
           <span className="font-syne text-xl font-extrabold tracking-tight sm:text-2xl">TapTile</span>
         </a>
@@ -92,10 +92,10 @@ export default function ComingSoon() {
 
           <div className="relative rotate-[2deg] rounded-[2rem] border-[4px] border-black bg-[#4ADE80] p-3 shadow-[10px_10px_0_#111111] sm:p-5 lg:p-5">
             <div className="absolute -left-5 -top-8 w-20 -rotate-12 sm:-left-10 sm:-top-10 sm:w-28">
-              <img src={confetti} alt="" className="w-full object-contain" />
+              <img src={confetti} alt="Confetti celebrating TapTile's launch" className="w-full object-contain" width={112} height={112} />
             </div>
             <div className="absolute -bottom-6 -right-3 w-16 rotate-12 sm:-bottom-12 sm:-right-12 sm:w-28">
-              <img src={coin} alt="" className="w-full object-contain" />
+              <img src={coin} alt="Digital payment coin icon" className="w-full object-contain" width={112} height={112} />
             </div>
 
             <div className="relative overflow-hidden rounded-[1.25rem] border-[3px] border-black bg-white p-4 sm:p-6 lg:p-5">
@@ -123,8 +123,8 @@ export default function ComingSoon() {
                   </div>
                 </div>
                 <div className="relative h-32 w-28 shrink-0 sm:h-44 sm:w-36">
-                  <img src={chameleonThinking} alt="A curious chameleon thinking about the secret launch" className="absolute inset-0 h-full w-full object-contain" />
-                  <img src={chameleonWink} alt="" className="absolute -right-3 bottom-0 w-12 rotate-12 object-contain sm:-right-5 sm:w-16" />
+                  <img src={chameleonThinking} alt="TapTile mascot chameleon thinking about digital receipts" className="absolute inset-0 h-full w-full object-contain" width={144} height={176} />
+                  <img src={chameleonWink} alt="TapTile mascot chameleon winking" className="absolute -right-3 bottom-0 w-12 rotate-12 object-contain sm:-right-5 sm:w-16" width={64} height={64} />
                 </div>
               </div>
 
@@ -145,7 +145,7 @@ export default function ComingSoon() {
             </div>
           </div>
 
-          <img src={lightning} alt="" className="absolute -bottom-9 left-4 w-14 -rotate-12 object-contain sm:-bottom-12 sm:left-8 sm:w-20" />
+          <img src={lightning} alt="Lightning bolt — TapTile's instant digital receipt delivery" className="absolute -bottom-9 left-4 w-14 -rotate-12 object-contain sm:-bottom-12 sm:left-8 sm:w-20" width={80} height={80} />
         </div>
       </section>
 

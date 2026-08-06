@@ -1,0 +1,50 @@
+# TapTile — Pakistan's 1st Digital Receipt Network
+
+> TapTile is a zero-POS-change hardware and software network that intercepts receipt data at the point of sale, instantly delivering digital receipts to customers via NFC tap or QR code in under two seconds — eliminating thermal paper roll costs by 85% and automating FBR (Federal Board of Revenue) fiscal compliance for Pakistani retailers.
+
+## What TapTile Does
+
+TapTile is a fintech infrastructure company based in Pakistan that provides:
+
+- **Digital Receipt Delivery:** Customers receive itemized receipts on their smartphone via NFC tap or QR scan at checkout — no app download required.
+- **Zero POS Modification:** A plug-and-play hardware device installs between the existing POS terminal and thermal receipt printer, intercepting ESC/POS print data without touching the billing software.
+- **FBR Fiscalization Automation:** The platform auto-generates and transmits fiscal invoice records to FBR Tier-1 servers for regulatory compliance.
+- **Paper Cost Elimination:** Reduces thermal paper roll procurement expenses by up to 85%.
+- **Offline Resilience:** Operates fully offline, caching receipts locally and syncing to cloud when connectivity is restored.
+
+## Key Pages
+
+- [TapTile Home — Pakistan's 1st Digital Receipt Network](https://taptile.pk/): Overview of the platform, how it works, pricing, and pilot sign-up.
+- [Digital Receipts Guide](https://taptile.pk/digital-receipts): Definitive guide to digital receipts for retailers in Pakistan.
+- [NFC POS Intercept Technology](https://taptile.pk/nfc-pos-intercept): Zero-code POS intercept hardware architecture explained.
+- [FBR Fiscalization Compliance](https://taptile.pk/fbr-fiscalization): FBR Tier-1 retailer compliance and automated digital invoice reporting.
+- [Paperless Checkout](https://taptile.pk/paperless-checkout): Eliminating thermal paper and calculating paper roll cost savings.
+- [TapTile Merchant Portal](https://merchant.taptile.pk): Login dashboard for retail merchants to monitor transactions, manage branches, and view FBR compliance feeds.
+
+## Company Information
+
+- **Company Name:** TapTile Technologies
+- **Country:** Pakistan
+- **Founded:** 2026
+- **Sector:** Fintech / Retail POS Technology / Digital Receipts
+- **Target Market:** Pakistani retail chains, supermarkets, pharmacies, quick-service restaurants
+- **Contact:** contact@taptile.pk
+
+## Technical Architecture
+
+- Hardware intercept via USB and RS-232 Serial ESC/POS print stream
+- NFC delivery speed: Under 2 seconds from tap to receipt
+- QR code generation: High-density, printer-agnostic QR codes
+- Backend: Cloud-synced middleware with offline-first counter device
+- Compliance: FBR Tier-1 automatic invoice transmission
+
+## Target Keywords & Entities
+
+- Digital Receipts Pakistan
+- NFC POS Intercept Hardware
+- FBR Fiscal Compliance Software Pakistan
+- Paperless Checkout POS
+- ESC/POS Printer Intercept
+- Thermal Paper Cost Reduction
+- Pakistan Retail POS Technology
+- FBR Tier-1 Integration

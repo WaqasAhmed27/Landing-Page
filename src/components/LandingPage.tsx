@@ -3,22 +3,22 @@ import { Check, Menu, X, Plus, Droplet, Recycle, Trees, ArrowRight, Smartphone, 
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import originalLogo from "../assets/images/taptile_logo_original.png";
-import neobrutalistLogo from "../assets/images/taptile_logo_neobrutalist.png";
+import originalLogo from "../assets/images/taptile_logo_original.webp";
+import neobrutalistLogo from "../assets/images/taptile_logo_neobrutalist.webp";
 import TrailCanvas from "./TrailCanvas";
 import BrutalButton from "./BrutalButton";
 import PageLoader from "./PageLoader";
 
 gsap.registerPlugin(ScrollTrigger);
-import imgGlasses from "../assets/images/trail_images/chameleon_glasses.png";
-import imgTongue from "../assets/images/trail_images/chameleon_tongue.png";
-import imgWink from "../assets/images/trail_images/chameleon_wink.png";
-import imgCheckmark from "../assets/images/trail_images/checkmark.png";
-import imgCoin from "../assets/images/trail_images/coin.png";
-import imgLightning from "../assets/images/trail_images/lighning_bolt.png";
-import imgSpark from "../assets/images/trail_images/spark.png";
-import imgConfetti from "../assets/images/trail_images/confetti.png";
-import imgThinking from "../assets/images/chameleon_thinking.png";
+import imgGlasses from "../assets/images/trail_images/chameleon_glasses.webp";
+import imgTongue from "../assets/images/trail_images/chameleon_tongue.webp";
+import imgWink from "../assets/images/trail_images/chameleon_wink.webp";
+import imgCheckmark from "../assets/images/trail_images/checkmark.webp";
+import imgCoin from "../assets/images/trail_images/coin.webp";
+import imgLightning from "../assets/images/trail_images/lighning_bolt.webp";
+import imgSpark from "../assets/images/trail_images/spark.webp";
+import imgConfetti from "../assets/images/trail_images/confetti.webp";
+import imgThinking from "../assets/images/chameleon_thinking.webp";
 
 const Pill = ({ text, colorClass }: { text: string, colorClass: string }) => (
   <div className={`landing-pill inline-block border-2 border-black px-5 py-2 rounded-full shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] font-bold text-xs uppercase tracking-wider ${colorClass}`}>
@@ -120,10 +120,15 @@ export default function LandingPage() {
           }),
         });
       } else {
-        // Fallback for local testing without credentials
-        await new Promise((resolve) => setTimeout(resolve, 800));
-        setFormStatus("success");
-        return;
+        // Direct call to local API
+        res = await fetch("/api/waitlist", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...formData,
+            submittedAt: new Date().toISOString(),
+          }),
+        });
       }
 
       const data = await res.json().catch(() => ({}));
@@ -136,7 +141,7 @@ export default function LandingPage() {
       console.error("Form submit error:", err);
       setFormStatus("error");
       setFormErrorMessage(
-        err.message || "Failed to submit request. Please try again or email contact@taptile.pk directly."
+        err.message || "Failed to submit request. Please try again or email hello@taptile.pk directly."
       );
     }
   };
@@ -159,6 +164,7 @@ export default function LandingPage() {
   const appRef = useRef<HTMLDivElement>(null);
   const blobRef = useRef<HTMLDivElement>(null);
   const blobEffectRef = useRef<HTMLDivElement>(null);
+  const innerContainerRef = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -261,7 +267,8 @@ export default function LandingPage() {
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: stickyContainerRef.current,
-          start: "top top",
+          pin: innerContainerRef.current,
+          start: "top 80px",
           end: "bottom bottom",
           scrub: 1, // Smooth scrubbing
         }
@@ -504,11 +511,11 @@ export default function LandingPage() {
   const expenses = Math.round(calcVolume * 18.25).toLocaleString();
 
   const faqs = [
-    { q: "Does this require changes to our POS software?", a: "No. TapTile installs alongside your current system — your printer keeps working exactly as before. Our middleware intercepts the print job in parallel without touching your billing software. If TapTile ever goes offline, your paper receipts continue uninterrupted. Zero risk to your operations." },
-    { q: "Do customers need to install an app?", a: "No app, no account, no signup. The receipt opens instantly in their native mobile browser the moment they tap or scan. Customers with any NFC-enabled phone — Android or iPhone — can use it out of the box. No friction for you, no friction for them." },
+    { q: "Does this require changes to our POS software?", a: "No. TapTile installs alongside your current system - your printer keeps working exactly as before. Our middleware intercepts the print job in parallel without touching your billing software. If TapTile ever goes offline, your paper receipts continue uninterrupted. Zero risk to your operations." },
+    { q: "Do customers need to install an app?", a: "No app, no account, no signup. The receipt opens instantly in their native mobile browser the moment they tap or scan. Customers with any NFC-enabled phone - Android or iPhone - can use it out of the box. No friction for you, no friction for them." },
     { q: "What happens if internet is down at the counter?", a: "The TapTile counter device works fully offline. Customers can still tap or scan and receive their receipt instantly. The device caches all receipts locally and automatically syncs to the cloud the moment connectivity is restored. Your counter never stalls." },
-    { q: "How fast can a store go live?", a: "Most stores are fully live in under 48 hours. We handle the setup remotely — no store downtime, no technician visit required for most POS setups. You tell us your billing software; we handle the rest." },
-    { q: "Can TapTile still print paper receipts?", a: "Yes, always. TapTile runs alongside your thermal printer — paper receipts print exactly as before. You can go fully paperless, hybrid, or keep paper as the default. You're in control, and the switch is instant." },
+    { q: "How fast can a store go live?", a: "Most stores are fully live in under 48 hours. We handle the setup remotely - no store downtime, no technician visit required for most POS setups. You tell us your billing software; we handle the rest." },
+    { q: "Can TapTile still print paper receipts?", a: "Yes, always. TapTile runs alongside your thermal printer - paper receipts print exactly as before. You can go fully paperless, hybrid, or keep paper as the default. You're in control, and the switch is instant." },
   ];
 
   const getCardClasses = (isActive: boolean, baseBg: string, textClass: string = "text-black") => {
@@ -632,7 +639,7 @@ export default function LandingPage() {
       {/* Hero */}
       <section className="landing-hero relative pt-10 pb-8 md:pt-16 md:pb-12 px-4 sm:px-6 md:px-8 lg:px-12 max-w-[85rem] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
         <div className="absolute top-12 right-8 rotate-[8deg] z-20 xl:block hidden">
-      <img src={imgLightning} alt="" className="absolute -top-6 -left-6 w-12 h-12 -rotate-12 object-contain pointer-events-none drop-shadow-md z-10" />
+      <img src={imgLightning} alt="Lightning bolt - TapTile delivers digital receipts in under 2 seconds" className="absolute -top-6 -left-6 w-12 h-12 -rotate-12 object-contain pointer-events-none drop-shadow-md z-10" width={48} height={48} />
       <div className="pill-box bg-white border-[2px] border-[#111111] shadow-[2px_2px_0px_0px_#111111] rounded-full px-4 py-1.5 font-sans font-[700] text-[11px] text-[#111111] whitespace-nowrap">
         ⚡ Under 2 seconds
       </div>
@@ -650,7 +657,7 @@ export default function LandingPage() {
             </span>
           </h1>
           <p className="motion-reveal text-lg font-medium text-gray-700 mb-10 max-w-lg leading-relaxed">
-            One tap delivers a digital receipt to your customer in under two seconds — no app, no POS changes, no workflow friction. Live in under 48 hours.
+            One tap delivers a digital receipt to your customer in under two seconds - no app, no POS changes, no workflow friction. Live in under 48 hours.
           </p>
           
           <div className="motion-reveal flex flex-wrap gap-4 mb-12">
@@ -746,13 +753,13 @@ export default function LandingPage() {
       {/* The Problem with Paper */}
       <section id="platform" ref={stickyContainerRef} className="relative w-full bg-[#FFF248] h-auto md:h-[400vh]">
         <div className="absolute top-[10%] left-[62%] rotate-[-8deg] z-20 xl:block hidden">
-      <img src={imgTongue} alt="" className="absolute -bottom-6 -left-5 w-14 h-14 -rotate-6 object-contain pointer-events-none drop-shadow-md z-10" />
+      <img src={imgTongue} alt="TapTile mascot chameleon sticking tongue out - digital receipt fun" className="absolute -bottom-6 -left-5 w-14 h-14 -rotate-6 object-contain pointer-events-none drop-shadow-md z-10" width={56} height={56} />
       <div className="pill-box bg-white border-[2px] border-[#111111] shadow-[2px_2px_0px_0px_#111111] rounded-full px-4 py-1.5 font-sans font-[700] text-[11px] text-[#111111] whitespace-nowrap">
         🌿 100% paperless
       </div>
     </div>
-        {/* Sticky viewport content container */}
-        <div className="relative md:sticky top-0 h-auto md:h-[100dvh] w-full flex flex-col justify-center py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-8 lg:px-12">
+        {/* Viewport content container pinned by GSAP */}
+        <div ref={innerContainerRef} className="relative h-auto md:h-[calc(100dvh-5rem)] w-full flex flex-col justify-center py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-8 lg:px-12">
           
           <div className="max-w-[85rem] mx-auto w-full">
             <div className="flex justify-center mb-6 sm:mb-8 md:mb-12">
@@ -823,7 +830,7 @@ export default function LandingPage() {
 
             <div className="flex justify-center mt-8 sm:mt-12 md:mt-16">
               <div ref={footerRef} className="bg-white border-4 border-black px-5 py-3 md:px-6 md:py-4 rounded-2xl sm:rounded-full shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] font-syne font-bold text-sm sm:text-base md:text-xl text-center" style={{ willChange: 'transform, opacity' }}>
-                Every. Single. Year. — There's a better way.
+                Every. Single. Year. - There's a better way.
               </div>
             </div>
           </div>
@@ -833,7 +840,7 @@ export default function LandingPage() {
       {/* How It Works */}
       <section ref={howItWorksRef} className="py-12 md:py-20 px-4 sm:px-6 md:px-8 lg:px-12 w-full bg-[#FFFDF7] relative">
         <div className="absolute top-4 right-4 rotate-[-6deg] z-10 xl:block hidden">
-      <img src={imgWink} alt="" className="absolute -bottom-5 -right-4 w-12 h-12 rotate-12 object-contain pointer-events-none drop-shadow-md z-10" />
+      <img src={imgWink} alt="TapTile mascot chameleon winking - paperless checkout is simple" className="absolute -bottom-5 -right-4 w-12 h-12 rotate-12 object-contain pointer-events-none drop-shadow-md z-10" width={48} height={48} />
       <div className="pill-box bg-white border-[2px] border-[#111111] shadow-[2px_2px_0px_0px_#111111] rounded-full px-4 py-1.5 font-sans font-[700] text-[11px] text-[#111111] whitespace-nowrap">
         📵 No app needed
       </div>
@@ -850,7 +857,7 @@ export default function LandingPage() {
               Step 01
             </div>
             <h3 className="font-syne text-2xl lg:text-xl min-[1200px]:text-2xl xl:text-3xl font-extrabold mb-4 break-normal">Purchase made.</h3>
-            <p className="text-sm sm:text-base xl:text-lg font-medium text-gray-800">Customer pays as usual — cash, card, JazzCash, Raast, or Easypaisa. The cashier presses Print exactly as always.</p>
+            <p className="text-sm sm:text-base xl:text-lg font-medium text-gray-800">Customer pays as usual - cash, card, JazzCash, Raast, or Easypaisa. The cashier presses Print exactly as always.</p>
           </div>
 
           <div className={getCardClasses(activeHowItWorks[1], 'bg-[#FFF9C4]', 'text-black')}>
@@ -866,7 +873,7 @@ export default function LandingPage() {
               Step 03
             </div>
             <h3 className="font-syne text-2xl lg:text-xl min-[1200px]:text-2xl xl:text-3xl font-extrabold mb-4 break-normal">Counter device fires.</h3>
-            <p className="text-sm sm:text-base xl:text-lg font-medium text-gray-800">The Android tablet displays a QR code and writes the receipt URL to NFC — completely offline at the counter.</p>
+            <p className="text-sm sm:text-base xl:text-lg font-medium text-gray-800">The Android tablet displays a QR code and writes the receipt URL to NFC - completely offline at the counter.</p>
           </div>
 
           <div className={getCardClasses(activeHowItWorks[3], 'bg-[#22C55E]', 'text-[#111111]')}>
@@ -883,7 +890,7 @@ export default function LandingPage() {
       {/* The Interaction */}
       <section className="py-12 md:py-20 px-4 sm:px-6 md:px-8 lg:px-12 w-full bg-[#dcfce7] border-y-4 border-black relative">
         <div className="absolute bottom-8 left-4 rotate-[6deg] z-20 xl:block hidden">
-      <img src={imgGlasses} alt="" className="absolute -top-5 left-10 w-12 h-12 rotate-[15deg] object-contain pointer-events-none drop-shadow-md z-10" />
+      <img src={imgGlasses} alt="TapTile mascot chameleon wearing glasses - smart POS integration" className="absolute -top-5 left-10 w-12 h-12 rotate-[15deg] object-contain pointer-events-none drop-shadow-md z-10" width={48} height={48} />
       <div className="pill-box bg-white border-[2px] border-[#111111] shadow-[2px_2px_0px_0px_#111111] rounded-full px-4 py-1.5 font-sans font-[700] text-[11px] text-[#111111] whitespace-nowrap">
         🔒 End-to-end encrypted
       </div>
@@ -901,7 +908,7 @@ export default function LandingPage() {
               NFC delivers the receipt to the customer's phone in under two seconds. QR fallback is always there, and the counter can work offline.
             </p>
             <ul className="space-y-4 font-bold text-lg">
-              <li className="flex items-center gap-3"><Check size={24} className="text-black" /> Any NFC-enabled phone — no setup</li>
+              <li className="flex items-center gap-3"><Check size={24} className="text-black" /> Any NFC-enabled phone - no setup</li>
               <li className="flex items-center gap-3"><Check size={24} className="text-black" /> QR code fallback built in</li>
               <li className="flex items-center gap-3"><Check size={24} className="text-black" /> Under 2 seconds, start to finish</li>
               <li className="flex items-center gap-3"><Check size={24} className="text-black" /> Fully offline at the counter</li>
@@ -944,7 +951,7 @@ export default function LandingPage() {
       {/* Infrastructure */}
       <section id="integration" className="py-12 md:py-20 px-4 sm:px-6 md:px-8 lg:px-12 w-full bg-[#eef2ff] relative">
         <div className="absolute bottom-[-1.5rem] left-8 rotate-[4deg] z-10 xl:block hidden">
-      <img src={imgCheckmark} alt="" className="absolute -top-4 -right-5 w-10 h-10 rotate-6 object-contain pointer-events-none drop-shadow-md z-10" />
+      <img src={imgCheckmark} alt="Green checkmark - FBR compliant digital receipt issued" className="absolute -top-4 -right-5 w-10 h-10 rotate-6 object-contain pointer-events-none drop-shadow-md z-10" width={40} height={40} />
       <div className="pill-box bg-white border-[2px] border-[#111111] shadow-[2px_2px_0px_0px_#111111] rounded-full px-4 py-1.5 font-sans font-[700] text-[11px] text-[#111111] whitespace-nowrap">
         ✓ FBR compliant
       </div>
@@ -988,8 +995,8 @@ export default function LandingPage() {
       {/* Interactive Calculator */}
       <section id="pricing" className="py-12 md:py-20 px-4 sm:px-6 md:px-8 lg:px-12 w-full bg-[#FDFBEE] relative">
         <div className="absolute top-8 right-8 rotate-[8deg] z-20 xl:block hidden">
-      <img src={imgSpark} alt="" className="absolute -top-5 -left-4 w-10 h-10 -rotate-[20deg] object-contain pointer-events-none drop-shadow-md z-10" />
-      <img src={imgConfetti} alt="" className="absolute -bottom-6 -right-6 w-12 h-12 rotate-[25deg] object-contain pointer-events-none drop-shadow-md z-10" />
+      <img src={imgSpark} alt="Spark icon - instant NFC receipt delivery" className="absolute -top-5 -left-4 w-10 h-10 -rotate-[20deg] object-contain pointer-events-none drop-shadow-md z-10" width={40} height={40} />
+      <img src={imgConfetti} alt="Confetti - celebrating paperless retail in Pakistan" className="absolute -bottom-6 -right-6 w-12 h-12 rotate-[25deg] object-contain pointer-events-none drop-shadow-md z-10" width={48} height={48} />
       <div className="pill-box bg-white border-[2px] border-[#111111] shadow-[2px_2px_0px_0px_#111111] rounded-full px-4 py-1.5 font-sans font-[700] text-[11px] text-[#111111] whitespace-nowrap">
         📍 Made in Pakistan
       </div>
@@ -1045,7 +1052,7 @@ export default function LandingPage() {
       {/* Built for everyone */}
       <section className="py-12 md:py-20 px-4 sm:px-6 md:px-8 lg:px-12 w-full bg-[#FFF248] relative">
         <div className="absolute top-[-1rem] left-[15%] rotate-[-4deg] z-10 xl:block hidden">
-      <img src={imgCoin} alt="" className="absolute -bottom-5 -right-3 w-10 h-10 -rotate-12 object-contain pointer-events-none drop-shadow-md z-10" />
+      <img src={imgCoin} alt="Coin icon - save money by eliminating thermal paper receipts" className="absolute -bottom-5 -right-3 w-10 h-10 -rotate-12 object-contain pointer-events-none drop-shadow-md z-10" width={40} height={40} />
       <div className="pill-box bg-white border-[2px] border-[#111111] shadow-[2px_2px_0px_0px_#111111] rounded-full px-4 py-1.5 font-sans font-[700] text-[11px] text-[#111111] whitespace-nowrap">
         0 POS changes
       </div>
@@ -1099,7 +1106,7 @@ export default function LandingPage() {
             <div className="bg-white border-4 border-black rounded-2xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[6px] active:translate-y-[6px] active:shadow-none transition-all">
               <div className="text-[#4ADE80] mb-4"><Check size={32} /></div>
               <h3 className="font-syne text-2xl font-bold mb-3">Easy Returns</h3>
-              <p className="text-gray-700 font-medium mb-6">One-tap barcode access for seamless store returns — no digging through drawers.</p>
+              <p className="text-gray-700 font-medium mb-6">One-tap barcode access for seamless store returns - no digging through drawers.</p>
               <span className="font-bold border-b-2 border-black pb-1 hover:text-[#4ADE80] hover:border-[#4ADE80] transition-colors cursor-pointer">Learn more →</span>
             </div>
             <div className="bg-white border-4 border-black rounded-2xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[6px] active:translate-y-[6px] active:shadow-none transition-all">
@@ -1111,7 +1118,7 @@ export default function LandingPage() {
             <div className="bg-white border-4 border-black rounded-2xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[6px] active:translate-y-[6px] active:shadow-none transition-all">
               <div className="text-[#4ADE80] mb-4"><Check size={32} /></div>
               <h3 className="font-syne text-2xl font-bold mb-3">Loyalty</h3>
-              <p className="text-gray-700 font-medium mb-6">Integrated reward point tracking — your points, automatically, on every receipt.</p>
+              <p className="text-gray-700 font-medium mb-6">Integrated reward point tracking - your points, automatically, on every receipt.</p>
               <span className="font-bold border-b-2 border-black pb-1 hover:text-[#4ADE80] hover:border-[#4ADE80] transition-colors cursor-pointer">Learn more →</span>
             </div>
           </div>
@@ -1136,7 +1143,7 @@ export default function LandingPage() {
             <ul className="space-y-6">
               <li className="flex gap-4">
                 <span className="font-mono font-bold text-gray-400">01</span>
-                <p className="font-bold text-lg">HTTPS everywhere, always — Every receipt URL is delivered over encrypted connections.</p>
+                <p className="font-bold text-lg">HTTPS everywhere, always - Every receipt URL is delivered over encrypted connections.</p>
               </li>
               <li className="flex gap-4">
                 <span className="font-mono font-bold text-gray-400">02</span>
@@ -1144,7 +1151,7 @@ export default function LandingPage() {
               </li>
               <li className="flex gap-4">
                 <span className="font-mono font-bold text-gray-400">03</span>
-                <p className="font-bold text-lg">PDPO-ready separation — Data boundaries are architectural, not decorative.</p>
+                <p className="font-bold text-lg">PDPO-ready separation - Data boundaries are architectural, not decorative.</p>
               </li>
             </ul>
           </div>
@@ -1166,7 +1173,7 @@ export default function LandingPage() {
         <div className="flex justify-center mb-10">
           <div className="relative inline-block isolate">
             <Pill text="FAQ" colorClass="bg-[#4ADE80]" />
-            <img src={imgThinking} alt="" className="absolute -right-3 top-[-10%] -translate-y-1/2 w-[53px] h-[53px] object-contain -z-10" />
+            <img src={imgThinking} alt="TapTile mascot chameleon thinking - frequently asked questions about digital receipts" className="absolute -right-3 top-[-10%] -translate-y-1/2 w-[53px] h-[53px] object-contain -z-10" width={53} height={53} />
           </div>
         </div>
         <h2 className="text-center font-syne text-3xl sm:text-4xl md:text-5xl font-extrabold mb-8 sm:mb-12">Got questions?</h2>
@@ -1194,6 +1201,78 @@ export default function LandingPage() {
             </div>
           ))}
         </div>
+
+        {/* AEO Answer Blocks - structured semantic HTML for Google Featured Snippets,
+            People Also Ask (PAA) boxes, and AI Overview citations.
+            These are always visible to crawlers (not JS-gated like the accordion above). */}
+        <div className="mt-16 space-y-8" aria-label="Common questions about TapTile digital receipts">
+          <h3 className="sr-only">Key Questions About TapTile</h3>
+
+          {/* AEO Block 1: What is TapTile? */}
+          <div
+            className="bg-white border-4 border-black rounded-2xl p-6 sm:p-8 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+            itemScope
+            itemType="https://schema.org/Question"
+          >
+            <h3 className="font-syne font-extrabold text-xl sm:text-2xl mb-4" itemProp="name">
+              What is TapTile and how does it work for Pakistan retail stores?
+            </h3>
+            <div itemProp="acceptedAnswer" itemScope itemType="https://schema.org/Answer">
+              <p className="text-gray-700 font-medium leading-relaxed text-base sm:text-lg" itemProp="text">
+                <strong>TapTile</strong> is Pakistan's first zero-POS-change digital receipt network. It installs a plug-and-play hardware device between your existing POS terminal and thermal receipt printer, intercepting the ESC/POS print data stream without modifying any software. When a customer pays, the receipt is instantly delivered to their smartphone via NFC tap or QR scan - in under two seconds, with no app download required. Paper receipts continue printing in parallel, so there is zero disruption to your checkout operations.
+              </p>
+            </div>
+          </div>
+
+          {/* AEO Block 2: NFC POS Intercept */}
+          <div
+            className="bg-white border-4 border-black rounded-2xl p-6 sm:p-8 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+            itemScope
+            itemType="https://schema.org/Question"
+          >
+            <h3 className="font-syne font-extrabold text-xl sm:text-2xl mb-4" itemProp="name">
+              How does NFC POS receipt intercept work without changing POS software?
+            </h3>
+            <div itemProp="acceptedAnswer" itemScope itemType="https://schema.org/Answer">
+              <p className="text-gray-700 font-medium leading-relaxed text-base sm:text-lg" itemProp="text">
+                NFC POS receipt intercept uses a hardware module connected inline via USB or RS-232 Serial between the POS and thermal printer. TapTile's firmware listens to the standard ESC/POS print command stream, parses the receipt line items in real time, generates a unique digital receipt URL, and passes the print command through to the printer unchanged. The customer taps their NFC-enabled phone against the counter device or scans the displayed QR code to open the itemized digital receipt instantly in their mobile browser - no app, no account, no friction.
+              </p>
+            </div>
+          </div>
+
+          {/* AEO Block 3: FBR Fiscalization */}
+          <div
+            className="bg-white border-4 border-black rounded-2xl p-6 sm:p-8 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+            itemScope
+            itemType="https://schema.org/Question"
+          >
+            <h3 className="font-syne font-extrabold text-xl sm:text-2xl mb-4" itemProp="name">
+              Is TapTile compliant with FBR fiscalization requirements in Pakistan?
+            </h3>
+            <div itemProp="acceptedAnswer" itemScope itemType="https://schema.org/Answer">
+              <p className="text-gray-700 font-medium leading-relaxed text-base sm:text-lg" itemProp="text">
+                Yes. TapTile is fully compliant with FBR (Federal Board of Revenue) Tier-1 retailer fiscalization rules in Pakistan. The middleware automatically formats receipt data into the required fiscal invoice structure, attaches a verifiable FBR invoice number and QR code, and securely transmits the sales transaction to FBR servers in real time - while simultaneously delivering the digital receipt to the customer. This eliminates the need for separate FBR integration software and creates a complete, auditable electronic invoice trail.
+              </p>
+            </div>
+          </div>
+
+          {/* AEO Block 4: Paperless Checkout ROI */}
+          <div
+            className="bg-white border-4 border-black rounded-2xl p-6 sm:p-8 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+            itemScope
+            itemType="https://schema.org/Question"
+          >
+            <h3 className="font-syne font-extrabold text-xl sm:text-2xl mb-4" itemProp="name">
+              How much can a retail store save by switching to digital receipts with TapTile?
+            </h3>
+            <div itemProp="acceptedAnswer" itemScope itemType="https://schema.org/Answer">
+              <p className="text-gray-700 font-medium leading-relaxed text-base sm:text-lg" itemProp="text">
+                A store processing 500 transactions per day spends approximately PKR 18 per receipt on thermal paper rolls - roughly PKR 3.3 million per year. TapTile eliminates 85% of paper receipt usage, saving around PKR 2.8 million annually per high-volume location. Additionally, each thermal receipt roll requires approximately 0.36 litres of water and generates chemical BPS/BPA waste. Going paperless with TapTile is both a cost and environmental win for Pakistani retailers.
+              </p>
+            </div>
+          </div>
+        </div>
+
         </div>
       </section>
 
@@ -1298,7 +1377,7 @@ export default function LandingPage() {
                       "Sending Request..."
                     ) : (
                       <>
-                        Get a Free Compatibility Check <ArrowRight size={20} />
+                        Join the Waitlist <ArrowRight size={20} />
                       </>
                     )}
                   </BrutalButton>
@@ -1351,6 +1430,15 @@ export default function LandingPage() {
             <a href="#security" onClick={(e) => { e.preventDefault(); scrollToSection('security'); }} className="hover:text-[#4ADE80] transition-colors">Security</a>
             <span>·</span>
             <a href="#pricing" onClick={(e) => { e.preventDefault(); scrollToSection('pricing'); }} className="hover:text-[#4ADE80] transition-colors">Pricing</a>
+          </div>
+          <div className="flex flex-wrap justify-center gap-6 font-bold text-xs uppercase tracking-wider text-gray-500 mt-6 md:mt-0">
+            <a href="/digital-receipts.html" className="hover:text-[#4ADE80] transition-colors">Digital Receipts</a>
+            <span>·</span>
+            <a href="/fbr-fiscalization.html" className="hover:text-[#4ADE80] transition-colors">FBR Fiscalization</a>
+            <span>·</span>
+            <a href="/paperless-checkout.html" className="hover:text-[#4ADE80] transition-colors">Paperless ROI</a>
+            <span>·</span>
+            <a href="/nfc-pos-intercept.html" className="hover:text-[#4ADE80] transition-colors">NFC Architecture</a>
           </div>
           <div className="font-mono text-xs font-bold text-gray-500 uppercase tracking-widest">
             © 2026 · Karachi, Pakistan
