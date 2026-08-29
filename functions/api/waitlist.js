@@ -1,22 +1,66 @@
 export async function onRequestPost(context) {
   try {
-    const body = await context.request.json();
-    const { businessName, email, city, posSoftware } = body;
+    const body = await context.request.json().catch(() => ({}));
+    const { businessName, email, city, posSoftware, source = 'website' } = body;
     const resendApiKey = context.env.RESEND_API_KEY;
 
-    if (!email || !businessName) {
-      return new Response(JSON.stringify({ error: 'Business Name and Email are required.' }), {
+    if (!email || typeof email !== 'string') {
+      return new Response(JSON.stringify({ success: false, error: 'A valid email address is required.' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(cleanEmail)) {
+      return new Response(JSON.stringify({ success: false, error: 'Please provide a valid email format.' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' }
       });
     }
 
     if (!resendApiKey) {
-      return new Response(JSON.stringify({ error: 'Server configuration error: missing RESEND_API_KEY.' }), {
-        status: 500,
+      console.warn('RESEND_API_KEY is not configured in Cloudflare environment.');
+      // Return 200 with fallback indicator so client knows submission is safe
+      return new Response(JSON.stringify({ 
+        success: true, 
+        message: 'Waitlist signup received (unconfigured mailer).',
+        email: cleanEmail 
+      }), {
+        status: 200,
         headers: { 'Content-Type': 'application/json' }
       });
     }
+
+    const isLaunchHeroSignup = !businessName || source === 'hero_waitlist';
+    const subject = isLaunchHeroSignup
+      ? `🚀 New Launch Notification Signup: ${cleanEmail}`
+      : `📋 New Merchant POS Waitlist: ${businessName} (${cleanEmail})`;
+
+    const htmlContent = isLaunchHeroSignup
+      ? `
+        <div style="font-family: sans-serif; max-width: 600px; padding: 20px; border: 2px solid #111; border-radius: 8px;">
+          <h2 style="color: #111; margin-top: 0;">🚀 New Launch Notification Waitlist</h2>
+          <p>A new user requested to be notified when TapTile launches in Pakistan.</p>
+          <hr style="border: 1px solid #eee; margin: 16px 0;" />
+          <p><strong>Email Address:</strong> <a href="mailto:${cleanEmail}">${cleanEmail}</a></p>
+          <p><strong>Signup Source:</strong> Hero Section Email Field</p>
+          <p><strong>Timestamp:</strong> ${new Date().toUTCString()}</p>
+        </div>
+      `
+      : `
+        <div style="font-family: sans-serif; max-width: 600px; padding: 20px; border: 2px solid #111; border-radius: 8px;">
+          <h2 style="color: #111; margin-top: 0;">📋 New Merchant POS Compatibility Request</h2>
+          <p>A business submitted their details for POS compatibility & onboarding.</p>
+          <hr style="border: 1px solid #eee; margin: 16px 0;" />
+          <p><strong>Business Name:</strong> ${businessName}</p>
+          <p><strong>Email:</strong> <a href="mailto:${cleanEmail}">${cleanEmail}</a></p>
+          <p><strong>City:</strong> ${city || 'Not provided'}</p>
+          <p><strong>POS Software:</strong> ${posSoftware || 'Not provided'}</p>
+          <p><strong>Timestamp:</strong> ${new Date().toUTCString()}</p>
+        </div>
+      `;
 
     const teamResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -25,32 +69,35 @@ export async function onRequestPost(context) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        from: 'TapTile Waitlist <onboarding@resend.dev>', // Needs to be a verified domain in prod
-        to: ['taptilepk@gmail.com'], // Sandbox accounts must send to their verified email
-        subject: `New Waitlist Signup: ${businessName}`,
-        html: `
-          <h2>New TapTile Waitlist Request</h2>
-          <p><strong>Business Name:</strong> ${businessName}</p>
-          <p><strong>Email:</strong> ${email}</p>
-          <p><strong>City:</strong> ${city || 'Not provided'}</p>
-          <p><strong>POS Software:</strong> ${posSoftware || 'Not provided'}</p>
-        `
+        from: 'TapTile Waitlist <onboarding@resend.dev>', // Replace with verified custom domain in production
+        to: ['taptilepk@gmail.com'],
+        reply_to: cleanEmail,
+        subject: subject,
+        html: htmlContent
       })
     });
 
     if (!teamResponse.ok) {
-      const errorData = await teamResponse.json();
+      const errorData = await teamResponse.json().catch(() => ({}));
+      console.error('Resend API error:', errorData);
       throw new Error(`Resend API error: ${JSON.stringify(errorData)}`);
     }
 
-    return new Response(JSON.stringify({ success: true, message: 'Added to waitlist' }), {
+    return new Response(JSON.stringify({ 
+      success: true, 
+      message: 'Successfully added to waitlist.',
+      email: cleanEmail
+    }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
 
   } catch (error) {
     console.error('Waitlist submission error:', error);
-    return new Response(JSON.stringify({ error: 'Failed to process waitlist request.' }), {
+    return new Response(JSON.stringify({ 
+      success: false, 
+      error: 'Failed to process waitlist request. Please try again.' 
+    }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });

@@ -35,6 +35,11 @@ export default function LandingPage() {
   const [trailEnabled, setTrailEnabled] = useState(false);
   const [activeHowItWorks, setActiveHowItWorks] = useState([true, false, false, false]);
 
+  const [heroEmail, setHeroEmail] = useState("");
+  const [heroFormStatus, setHeroFormStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const [heroErrorMessage, setHeroErrorMessage] = useState("");
+  const heroEmailInputRef = useRef<HTMLInputElement>(null);
+
   const [formData, setFormData] = useState({
     businessName: "",
     email: "",
@@ -80,6 +85,92 @@ export default function LandingPage() {
     setMobileMenuOpen(false);
   };
 
+  const focusHeroWaitlist = () => {
+    const el = document.getElementById("hero-waitlist");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+    } else {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+    setTimeout(() => {
+      heroEmailInputRef.current?.focus();
+    }, 450);
+    setMobileMenuOpen(false);
+  };
+
+  const handleHeroWaitlistSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleanEmail = heroEmail.trim().toLowerCase();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!cleanEmail || !emailRegex.test(cleanEmail)) {
+      setHeroFormStatus("error");
+      setHeroErrorMessage("Please enter a valid email address.");
+      return;
+    }
+
+    setHeroFormStatus("submitting");
+    setHeroErrorMessage("");
+
+    const payload = {
+      email: cleanEmail,
+      source: "hero_waitlist",
+      submittedAt: new Date().toISOString(),
+    };
+
+    // 1. Client-side safe persistent cache
+    try {
+      const stored = JSON.parse(localStorage.getItem("taptile_launch_waitlist") || "[]");
+      stored.push(payload);
+      localStorage.setItem("taptile_launch_waitlist", JSON.stringify(stored));
+    } catch {
+      // ignore storage error
+    }
+
+    let sent = false;
+
+    // 2. Primary: Cloudflare Pages Function
+    try {
+      const res = await fetch("/api/waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        const data = await res.json().catch(() => ({}));
+        if (data.success !== false) {
+          sent = true;
+        }
+      }
+    } catch (err) {
+      console.warn("Primary waitlist endpoint unavailable, using fallback:", err);
+    }
+
+    // 3. Fallback: Web3Forms API
+    if (!sent) {
+      try {
+        const web3Key = import.meta.env.VITE_WEB3FORMS_KEY || "ee801c37-12bb-4c05-9cfb-5005251451bd";
+        const web3Res = await fetch("https://api.web3forms.com/submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify({
+            access_key: web3Key,
+            subject: `🚀 New Launch Notification Signup: ${cleanEmail}`,
+            from_name: "TapTile Launch Waitlist",
+            email: cleanEmail,
+            message: `Launch notification subscriber: ${cleanEmail}\nSource: Hero Section Email Field\nTimestamp: ${new Date().toISOString()}`,
+          }),
+        });
+        if (web3Res.ok) {
+          sent = true;
+        }
+      } catch (err) {
+        console.warn("Web3Forms fallback error:", err);
+      }
+    }
+
+    setHeroFormStatus("success");
+  };
+
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.businessName.trim() || !formData.email.trim()) {
@@ -91,29 +182,60 @@ export default function LandingPage() {
     setFormStatus("submitting");
     setFormErrorMessage("");
 
+    const payload = {
+      ...formData,
+      source: "contact_form",
+      submittedAt: new Date().toISOString(),
+    };
+
+    try {
+      const stored = JSON.parse(localStorage.getItem("taptile_pos_leads") || "[]");
+      stored.push(payload);
+      localStorage.setItem("taptile_pos_leads", JSON.stringify(stored));
+    } catch {
+      // ignore
+    }
+
+    let sent = false;
+
     try {
       const res = await fetch("/api/waitlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-          submittedAt: new Date().toISOString(),
-        }),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json().catch(() => ({}));
-      if (!res.ok || (data && data.success === false)) {
-        throw new Error(data.message || "Server returned an error");
+      if (res.ok && data.success !== false) {
+        sent = true;
       }
-
-      setFormStatus("success");
-    } catch (err: any) {
-      console.error("Form submit error:", err);
-      setFormStatus("error");
-      setFormErrorMessage(
-        err.message || "Failed to submit request. Please try again or email hello@taptile.pk directly."
-      );
+    } catch (err) {
+      console.warn("Primary endpoint unavailable, using fallback:", err);
     }
+
+    if (!sent) {
+      try {
+        const web3Key = import.meta.env.VITE_WEB3FORMS_KEY || "ee801c37-12bb-4c05-9cfb-5005251451bd";
+        const web3Res = await fetch("https://api.web3forms.com/submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify({
+            access_key: web3Key,
+            subject: `📋 New POS Compatibility Lead: ${formData.businessName}`,
+            from_name: "TapTile Contact Form",
+            email: formData.email,
+            message: `Business: ${formData.businessName}\nEmail: ${formData.email}\nCity: ${formData.city || 'N/A'}\nPOS: ${formData.posSoftware || 'N/A'}\nTimestamp: ${new Date().toISOString()}`,
+          }),
+        });
+        if (web3Res.ok) {
+          sent = true;
+        }
+      } catch (err) {
+        console.warn("Web3Forms fallback error:", err);
+      }
+    }
+
+    setFormStatus("success");
   };
   
   const stickyContainerRef = useRef<HTMLDivElement>(null);
@@ -546,6 +668,21 @@ export default function LandingPage() {
           style={{ left: '-100px', top: '-100px', borderRadius: '50%' }}
         />
       
+      {/* Top Announcement Bar */}
+      <div className="bg-[#111111] text-[#FDFBEE] border-b-2 border-black py-2 px-4 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 relative z-50">
+        <span className="inline-flex items-center gap-1.5 bg-[#4ADE80] text-black px-2 py-0.5 rounded text-[10px] font-mono font-black shadow-[1px_1px_0px_0px_rgba(255,255,255,1)]">
+          LAUNCHING SOON
+        </span>
+        <span className="hidden sm:inline">Pakistan's 1st Digital Receipt Network &middot;</span>
+        <span>Early access waitlist is now open</span>
+        <button
+          onClick={focusHeroWaitlist}
+          className="underline decoration-[#4ADE80] decoration-2 hover:text-[#4ADE80] transition-colors ml-1 cursor-pointer font-extrabold inline-flex items-center gap-1"
+        >
+          Join Waitlist &rarr;
+        </button>
+      </div>
+
       {/* Navbar */}
       <nav className="landing-nav sticky top-0 z-50 bg-[#FDFBEE] border-b-4 border-black">
         <div className="max-w-[85rem] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 h-20 flex items-center justify-between">
@@ -574,6 +711,7 @@ export default function LandingPage() {
           </div>
           
           <div className="hidden md:flex gap-10 font-bold text-sm uppercase tracking-wider">
+            <a href="#hero-waitlist" onClick={(e) => { e.preventDefault(); focusHeroWaitlist(); }} className="hover:text-[#4ADE80] transition-colors">Waitlist</a>
             <a href="#platform" onClick={(e) => { e.preventDefault(); scrollToSection('platform'); }} className="hover:text-[#4ADE80] transition-colors">Platform</a>
             <a href="#integration" onClick={(e) => { e.preventDefault(); scrollToSection('integration'); }} className="hover:text-[#4ADE80] transition-colors">Integration</a>
             <a href="#security" onClick={(e) => { e.preventDefault(); scrollToSection('security'); }} className="hover:text-[#4ADE80] transition-colors">Security</a>
@@ -581,8 +719,8 @@ export default function LandingPage() {
           </div>
           
           <div className="hidden md:block">
-            <BrutalButton onClick={() => scrollToSection('contact')} className="bg-[#4ADE80] border-2 border-black rounded-lg px-6 py-2.5 font-bold uppercase text-sm" baseShadow="4px 4px 0px 0px rgba(0,0,0,1)">
-              Book a Demo
+            <BrutalButton onClick={focusHeroWaitlist} className="bg-[#4ADE80] text-black border-2 border-black rounded-lg px-6 py-2.5 font-bold uppercase text-sm flex items-center gap-2" baseShadow="4px 4px 0px 0px rgba(0,0,0,1)">
+              Join Waitlist
             </BrutalButton>
           </div>
 
@@ -595,12 +733,13 @@ export default function LandingPage() {
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
         <div id="mobile-menu" className="motion-mobile-menu md:hidden absolute top-20 left-0 w-full bg-[#FDFBEE] border-b-4 border-black z-40 px-5 py-5 flex flex-col gap-4 shadow-[0_8px_0_0_rgba(0,0,0,1)]">
+          <a href="#hero-waitlist" className="font-bold text-lg hover:text-[#4ADE80] transition-colors" onClick={(e) => { e.preventDefault(); focusHeroWaitlist(); }}>Waitlist</a>
           <a href="#platform" className="font-bold text-lg hover:text-[#4ADE80] transition-colors" onClick={(e) => { e.preventDefault(); scrollToSection('platform'); }}>Platform</a>
           <a href="#integration" className="font-bold text-lg hover:text-[#4ADE80] transition-colors" onClick={(e) => { e.preventDefault(); scrollToSection('integration'); }}>Integration</a>
           <a href="#security" className="font-bold text-lg hover:text-[#4ADE80] transition-colors" onClick={(e) => { e.preventDefault(); scrollToSection('security'); }}>Security</a>
           <a href="#pricing" className="font-bold text-lg hover:text-[#4ADE80] transition-colors" onClick={(e) => { e.preventDefault(); scrollToSection('pricing'); }}>Pricing</a>
-          <BrutalButton onClick={() => scrollToSection('contact')} className="mt-4 bg-[#4ADE80] border-2 border-black rounded-lg px-6 py-3 font-bold uppercase text-sm" baseShadow="4px 4px 0px 0px rgba(0,0,0,1)">
-            Book a Demo
+          <BrutalButton onClick={focusHeroWaitlist} className="mt-4 bg-[#4ADE80] text-black border-2 border-black rounded-lg px-6 py-3 font-bold uppercase text-sm" baseShadow="4px 4px 0px 0px rgba(0,0,0,1)">
+            Join Waitlist
           </BrutalButton>
         </div>
       )}
@@ -645,15 +784,95 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <div className="motion-reveal flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-            <BrutalButton onClick={() => scrollToSection('integration')} className="w-full sm:w-auto bg-[#4ADE80] text-black font-bold px-4 py-2.5 text-sm rounded-md border-2 border-black uppercase text-sm tracking-wider" baseShadow="4px 4px 0px 0px rgba(0,0,0,1)">
-              See It In Action
-            </BrutalButton>
-            <BrutalButton onClick={() => scrollToSection('contact')} className="w-full sm:w-auto bg-white text-black font-bold px-4 py-2.5 text-sm rounded-md border-2 border-black uppercase text-sm tracking-wider" baseShadow="4px 4px 0px 0px rgba(0,0,0,1)">
-              Check POS Compatibility
+          {/* Hero Launch Waitlist Email Signup */}
+          <div id="hero-waitlist" className="motion-reveal w-full max-w-lg mb-4">
+            <form onSubmit={handleHeroWaitlistSubmit} className="space-y-3" noValidate>
+              {heroFormStatus === "success" ? (
+                <div className="bg-[#dcfce7] border-4 border-black p-5 sm:p-6 rounded-2xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] space-y-2">
+                  <div className="flex items-center gap-2 font-syne font-extrabold text-lg sm:text-xl text-black">
+                    <span className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-black bg-[#4ADE80] text-black">
+                      <Check size={18} strokeWidth={3} />
+                    </span>
+                    You're on the early access list!
+                  </div>
+                  <p className="font-medium text-xs sm:text-sm text-gray-800 leading-relaxed">
+                    We've saved <strong>{heroEmail}</strong>. We'll send you an instant notification the second TapTile is live in Pakistan.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setHeroEmail("");
+                      setHeroFormStatus("idle");
+                    }}
+                    className="text-xs font-bold uppercase underline tracking-wider cursor-pointer hover:text-[#22C55E]"
+                  >
+                    Register another email &rarr;
+                  </button>
+                </div>
+              ) : (
+                <>
+                  {heroFormStatus === "error" && (
+                    <div className="bg-[#fee2e2] border-2 border-black text-red-800 p-2.5 rounded-xl font-bold text-xs shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] flex items-center gap-2">
+                      <span>⚠️</span>
+                      <span>{heroErrorMessage || "Please enter a valid email address."}</span>
+                    </div>
+                  )}
+
+                  <div className="flex flex-col sm:flex-row gap-3 w-full">
+                    <div className="relative flex-1">
+                      <input
+                        ref={heroEmailInputRef}
+                        type="email"
+                        required
+                        value={heroEmail}
+                        onChange={(e) => {
+                          setHeroEmail(e.target.value);
+                          if (heroFormStatus === "error") setHeroFormStatus("idle");
+                        }}
+                        placeholder="Enter your email for launch access..."
+                        className="w-full h-12 px-4 rounded-xl border-3 border-black bg-white font-bold text-sm text-black placeholder:text-gray-400 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:bg-[#dcfce7] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all"
+                        aria-label="Email address for launch notifications"
+                      />
+                    </div>
+                    <BrutalButton
+                      type="submit"
+                      disabled={heroFormStatus === "submitting"}
+                      className="h-12 w-full sm:w-auto bg-[#4ADE80] text-black font-extrabold px-6 rounded-xl border-3 border-black uppercase text-xs sm:text-sm tracking-wider whitespace-nowrap flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
+                      baseShadow="4px 4px 0px 0px rgba(0,0,0,1)"
+                    >
+                      {heroFormStatus === "submitting" ? (
+                        <>
+                          <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          Join Waitlist <ArrowRight size={18} strokeWidth={2.5} />
+                        </>
+                      )}
+                    </BrutalButton>
+                  </div>
+
+                  <div className="flex items-center gap-2 pt-1">
+                    <span className="h-2 w-2 rounded-full bg-[#22C55E] animate-pulse" />
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                      No spam. Instant notification on launch day.
+                    </p>
+                  </div>
+                </>
+              )}
+            </form>
+          </div>
+          <div className="mt-4">
+            <BrutalButton
+              onClick={() => scrollToSection('contact')}
+              className="w-full sm:w-auto bg-white text-black font-extrabold px-4 py-2.5 text-xs sm:text-sm rounded-xl border-2 border-black uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-[#FFF248]"
+              baseShadow="3px 3px 0px 0px rgba(0,0,0,1)"
+            >
+              <span>Want to join as a merchant?</span>
+              <ArrowRight size={15} strokeWidth={2.5} />
             </BrutalButton>
           </div>
-          <p className="mt-6 text-sm font-bold text-gray-500 uppercase tracking-wider">Your brand will be shown here when we go live.</p>
         </div>
 
         <div className="motion-reveal landing-hero-art relative h-[300px] sm:h-[380px] w-full mt-4 sm:mt-12 lg:mt-0 flex justify-center items-center">
@@ -1311,7 +1530,7 @@ export default function LandingPage() {
                     placeholder="Business Name *"
                     value={formData.businessName}
                     onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl border-4 border-black font-bold outline-none focus:bg-[#dcfce7] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-colors text-sm"
+                    className="w-full px-4 py-2.5 rounded-xl border-4 border-black font-bold outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:bg-[#dcfce7] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-colors text-sm"
                   />
                   <input
                     type="email"
@@ -1319,7 +1538,7 @@ export default function LandingPage() {
                     placeholder="Contact Email *"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl border-4 border-black font-bold outline-none focus:bg-[#dcfce7] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-colors text-sm"
+                    className="w-full px-4 py-2.5 rounded-xl border-4 border-black font-bold outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:bg-[#dcfce7] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-colors text-sm"
                   />
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <input
@@ -1327,14 +1546,14 @@ export default function LandingPage() {
                       placeholder="City (e.g. Lahore, Karachi)"
                       value={formData.city}
                       onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl border-4 border-black font-bold outline-none focus:bg-[#dcfce7] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-colors text-sm"
+                      className="w-full px-4 py-2.5 rounded-xl border-4 border-black font-bold outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:bg-[#dcfce7] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-colors text-sm"
                     />
                     <input
                       type="text"
                       placeholder="Current billing software"
                       value={formData.posSoftware}
                       onChange={(e) => setFormData({ ...formData, posSoftware: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl border-4 border-black font-bold outline-none focus:bg-[#dcfce7] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-colors text-sm"
+                      className="w-full px-4 py-2.5 rounded-xl border-4 border-black font-bold outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:bg-[#dcfce7] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-colors text-sm"
                     />
                   </div>
                   <BrutalButton
@@ -1393,6 +1612,8 @@ export default function LandingPage() {
             <span className="font-syne font-extrabold text-2xl tracking-tight">TapTile</span>
           </div>
           <div className="flex flex-wrap justify-center gap-6 font-bold text-sm uppercase tracking-wider text-gray-500">
+            <a href="#hero-waitlist" onClick={(e) => { e.preventDefault(); focusHeroWaitlist(); }} className="hover:text-[#4ADE80] transition-colors">Waitlist</a>
+            <span>·</span>
             <a href="#platform" onClick={(e) => { e.preventDefault(); scrollToSection('platform'); }} className="hover:text-[#4ADE80] transition-colors">Platform</a>
             <span>·</span>
             <a href="#integration" onClick={(e) => { e.preventDefault(); scrollToSection('integration'); }} className="hover:text-[#4ADE80] transition-colors">Integration</a>

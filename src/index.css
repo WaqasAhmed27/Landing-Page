@@ -38,9 +38,27 @@ section[id] {
   }
 }
 
-:focus-visible {
+:focus-visible:not(input):not(textarea):not(select) {
   outline: 3px solid #111111;
   outline-offset: 4px;
+}
+
+input,
+textarea,
+select {
+  outline: none !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+input:focus,
+input:focus-visible,
+textarea:focus,
+textarea:focus-visible,
+select:focus,
+select:focus-visible {
+  outline: none !important;
+  outline-offset: 0 !important;
+  box-shadow: none;
 }
 
 .landing-shell {
@@ -476,8 +494,29 @@ section[id] {
   .hero-receipt {
     left: -2px;
     top: 34px;
-    width: 148px;
+    width: 155px;
     padding: 14px 13px 12px;
+  }
+
+  .hero-receipt-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 4px;
+    padding-top: 8px;
+    font-size: 11px;
+  }
+
+  .hero-receipt-total span:first-child {
+    font-size: 10px;
+    line-height: 1.1;
+    font-weight: 800;
+  }
+
+  .hero-receipt-total span:last-child {
+    font-size: 12px;
+    font-weight: 800;
+    white-space: nowrap;
   }
 
   .hero-phone {
@@ -485,6 +524,10 @@ section[id] {
     top: 70px;
     width: 108px;
     height: 222px;
+  }
+
+  .hero-phone-notch {
+    height: 15px;
   }
 
   .hero-nfc {
