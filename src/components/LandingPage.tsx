@@ -603,9 +603,9 @@ export default function LandingPage() {
   const expenses = Math.round(calcVolume * 18.25).toLocaleString();
 
   const faqs = [
-    { q: "Does this require changes to our POS software?", a: "No. TapTile installs alongside your current system - your printer keeps working exactly as before. Our middleware intercepts the print job in parallel without touching your billing software. If TapTile ever goes offline, your paper receipts continue uninterrupted. Zero risk to your operations." },
+    { q: "Does this require changes to our POS software?", a: "No. TapTile installs alongside your current system — your printer keeps working exactly as before. It runs independently without touching your billing software. If TapTile ever goes offline, your paper receipts continue uninterrupted. Zero risk to your operations." },
     { q: "Do customers need to install an app?", a: "No app, no account, no signup. The receipt opens instantly in their native mobile browser the moment they tap or scan. Customers with any NFC-enabled phone - Android or iPhone - can use it out of the box. No friction for you, no friction for them." },
-    { q: "What happens if internet is down at the counter?", a: "The TapTile counter device works fully offline. Customers can still tap or scan and receive their receipt instantly. The device caches all receipts locally and automatically syncs to the cloud the moment connectivity is restored. Your counter never stalls." },
+    { q: "What happens if internet is down at the counter?", a: "The TapTile counter device works fully offline. Customers can still tap or scan and receive their receipt instantly. Everything syncs automatically the moment connectivity is restored. Your counter never stalls." },
     { q: "How fast can a store go live?", a: "Most stores are fully live in under 48 hours. We handle the setup remotely - no store downtime, no technician visit required for most POS setups. You tell us your billing software; we handle the rest." },
     { q: "Can TapTile still print paper receipts?", a: "Yes, always. TapTile runs alongside your thermal printer - paper receipts print exactly as before. You can go fully paperless, hybrid, or keep paper as the default. You're in control, and the switch is instant." },
   ];
@@ -1054,7 +1054,7 @@ export default function LandingPage() {
               Step 02
             </div>
             <h3 className="font-syne text-2xl lg:text-xl min-[1200px]:text-2xl xl:text-3xl font-extrabold mb-4 break-normal">Intercept instantly.</h3>
-            <p className="text-sm sm:text-base xl:text-lg font-medium text-gray-800">Our middleware reads the print job in parallel. The receipt prints on paper and triggers the digital version simultaneously.</p>
+            <p className="text-sm sm:text-base xl:text-lg font-medium text-gray-800">The moment your printer fires, TapTile creates the digital version automatically. Paper prints as usual — nothing changes at the counter.</p>
           </div>
 
           <div className={getCardClasses(activeHowItWorks[2], 'bg-[#DCFCE7]', 'text-black')}>
@@ -1062,7 +1062,7 @@ export default function LandingPage() {
               Step 03
             </div>
             <h3 className="font-syne text-2xl lg:text-xl min-[1200px]:text-2xl xl:text-3xl font-extrabold mb-4 break-normal">Counter device fires.</h3>
-            <p className="text-sm sm:text-base xl:text-lg font-medium text-gray-800">The Android tablet displays a QR code and writes the receipt URL to NFC - completely offline at the counter.</p>
+            <p className="text-sm sm:text-base xl:text-lg font-medium text-gray-800">The counter device displays a QR code and activates NFC — ready for the customer to collect their receipt, even fully offline.</p>
           </div>
 
           <div className={getCardClasses(activeHowItWorks[3], 'bg-[#22C55E]', 'text-[#111111]')}>
@@ -1408,7 +1408,7 @@ export default function LandingPage() {
             </h3>
             <div itemProp="acceptedAnswer" itemScope itemType="https://schema.org/Answer">
               <p className="text-gray-700 font-medium leading-relaxed text-base sm:text-lg" itemProp="text">
-                <strong>TapTile</strong> is Pakistan's first zero-POS-change digital receipt network. It installs a plug-and-play hardware device between your existing POS terminal and thermal receipt printer, intercepting the ESC/POS print data stream without modifying any software. When a customer pays, the receipt is instantly delivered to their smartphone via NFC tap or QR scan - in under two seconds, with no app download required. Paper receipts continue printing in parallel, so there is zero disruption to your checkout operations.
+                <strong>TapTile</strong> is Pakistan's first zero-POS-change digital receipt network. A compact plug-and-play device sits at your counter and works alongside your existing printer — no software changes, no IT support needed. When a customer pays, the receipt is instantly delivered to their smartphone via NFC tap or QR scan in under two seconds, with no app download required. Paper receipts continue printing in parallel, so there is zero disruption to your checkout operations.
               </p>
             </div>
           </div>
@@ -1420,11 +1420,11 @@ export default function LandingPage() {
             itemType="https://schema.org/Question"
           >
             <h3 className="font-syne font-extrabold text-xl sm:text-2xl mb-4" itemProp="name">
-              How does NFC POS receipt intercept work without changing POS software?
+              How does TapTile deliver digital receipts without changing POS software?
             </h3>
             <div itemProp="acceptedAnswer" itemScope itemType="https://schema.org/Answer">
               <p className="text-gray-700 font-medium leading-relaxed text-base sm:text-lg" itemProp="text">
-                NFC POS receipt intercept uses a hardware module connected inline via USB or RS-232 Serial between the POS and thermal printer. TapTile's firmware listens to the standard ESC/POS print command stream, parses the receipt line items in real time, generates a unique digital receipt URL, and passes the print command through to the printer unchanged. The customer taps their NFC-enabled phone against the counter device or scans the displayed QR code to open the itemized digital receipt instantly in their mobile browser - no app, no account, no friction.
+                TapTile's counter device connects to your existing setup in minutes — no software installation, no driver changes, no IT ticket. Every time a receipt is generated, the device automatically creates a digital copy and makes it available to the customer via NFC tap or QR scan. The paper receipt still prints exactly as before, completely unaffected. The customer opens the itemized digital receipt instantly in their mobile browser — no app, no account, no friction.
               </p>
             </div>
           </div>
@@ -1440,7 +1440,7 @@ export default function LandingPage() {
             </h3>
             <div itemProp="acceptedAnswer" itemScope itemType="https://schema.org/Answer">
               <p className="text-gray-700 font-medium leading-relaxed text-base sm:text-lg" itemProp="text">
-                Yes. TapTile is fully compliant with FBR (Federal Board of Revenue) Tier-1 retailer fiscalization rules in Pakistan. The middleware automatically formats receipt data into the required fiscal invoice structure, attaches a verifiable FBR invoice number and QR code, and securely transmits the sales transaction to FBR servers in real time - while simultaneously delivering the digital receipt to the customer. This eliminates the need for separate FBR integration software and creates a complete, auditable electronic invoice trail.
+                Yes. TapTile is fully compliant with FBR (Federal Board of Revenue) Tier-1 retailer fiscalization rules in Pakistan. Every transaction automatically generates a verifiable FBR invoice number and QR code, and the fiscal record is securely transmitted to FBR in real time — while the digital receipt is delivered to the customer simultaneously. No separate FBR integration software is needed; TapTile handles it end-to-end.
               </p>
             </div>
           </div>
