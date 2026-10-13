@@ -47,7 +47,7 @@ To build the project for production, run:
 npm run build
 ```
 
-This will generate an optimized bundle in the `dist` folder. To preview the production build locally, run:
+This will generate an optimized bundle in the `dist` folder and prepare the filtered `.worker-dist` directory used by the Cloudflare Worker deployment. To preview the production build locally, run:
 
 ```bash
 npm run preview

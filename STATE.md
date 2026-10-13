@@ -31,7 +31,7 @@ Verification:
 - **Wired Lead Generation Form** — Captures Business Name, Contact Email, City, and POS Software with validation, submit state, and fallback demo confirmation box.
 - **Animated Chameleon Trail** (`TrailCanvas.tsx`) — Cursor-following interactive image trail powered by GSAP and Framer Motion.
 - **Responsive Design System** — Built with Tailwind v4, responsive breakpoints across mobile, tablet, and desktop screens.
-- **Clean Build Pipeline** — Configured for Vite static SPA build (`dist/`) or Node server fallback ([server.js](file:///e:/OneDrive/Desktop/TapTile%20Org/Landing-Page/server.js)).
+- **Clean Build Pipeline** — Configured for Vite static SPA build (`dist/`) and filtered Cloudflare Worker assets (`.worker-dist/`).
 
 ---
 
@@ -59,7 +59,7 @@ npm run dev
 npm run lint   # (runs tsc --noEmit)
 
 # 4. Build for production distribution
-npm run build  # (outputs static site to dist/)
+npm run build  # (outputs static site to dist/ and prepares .worker-dist/)
 
 # 5. Preview production build locally
 npm run preview
