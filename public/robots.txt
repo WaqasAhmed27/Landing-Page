@@ -1,11 +1,12 @@
 # TapTile Public Robots Policy
-# Last updated: 2026-08-06
+# Last updated: 2026-10-13
 
 # Default: Allow all legitimate crawlers full access
 User-agent: *
 Allow: /
 Disallow: /api/
 Disallow: /admin/
+Content-Signal: ai-train=yes, search=yes, ai-input=no
 
 # ── AI Search Engine Crawlers ──────────────────────────────────────────────────
 # These crawlers power ChatGPT Search, Google AI Overviews, Perplexity,
