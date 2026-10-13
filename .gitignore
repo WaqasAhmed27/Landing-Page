@@ -8,4 +8,5 @@ coverage/
 !.env.example
 .dev.vars
 .wrangler/
+.worker-dist/
 *.apk

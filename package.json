@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite --port=3000 --host=0.0.0.0",
     "build": "vite build",
+    "prepare:worker-assets": "node scripts/prepare-worker-assets.mjs",
+    "deploy:worker": "npm run build && npm run prepare:worker-assets && npx wrangler deploy --config wrangler.jsonc",
     "start": "npm run build && node server.js",
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",

@@ -1,0 +1,10 @@
+{
+  "name": "taptile-landing-page",
+  "main": "worker.js",
+  "compatibility_date": "2026-10-06",
+  "assets": {
+    "directory": "./.worker-dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application"
+  }
+}
