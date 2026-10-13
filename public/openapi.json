@@ -1,0 +1,108 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "TapTile Landing Page API",
+    "description": "Public APIs served by the TapTile marketing site at taptile.pk. Currently provides a waitlist signup endpoint for merchant onboarding and launch notifications.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "TapTile",
+      "email": "taptilepk@gmail.com",
+      "url": "https://taptile.pk"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://taptile.pk",
+      "description": "Production"
+    }
+  ],
+  "paths": {
+    "/api/waitlist": {
+      "post": {
+        "operationId": "submitWaitlist",
+        "summary": "Join the TapTile waitlist",
+        "description": "Submit a business or individual email to the TapTile merchant waitlist. Supports both simple launch-notification signups (email only) and full POS-compatibility requests (with business details).",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email"],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Contact email address."
+                  },
+                  "businessName": {
+                    "type": "string",
+                    "description": "Name of the business. Omit for simple launch-notification signups."
+                  },
+                  "city": {
+                    "type": "string",
+                    "description": "City where the business operates."
+                  },
+                  "posSoftware": {
+                    "type": "string",
+                    "description": "POS software the business currently uses."
+                  },
+                  "source": {
+                    "type": "string",
+                    "default": "website",
+                    "description": "Signup source identifier (e.g. 'hero_waitlist')."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Signup accepted.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "message": { "type": "string" },
+                    "email": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or missing email.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "error": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error processing the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "error": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
