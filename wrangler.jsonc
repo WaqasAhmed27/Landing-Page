@@ -2,6 +2,13 @@
   "name": "taptile-landing-page",
   "main": "worker.js",
   "compatibility_date": "2026-10-06",
+  "d1_databases": [
+    {
+      "binding": "taptile_waitlist",
+      "database_name": "taptile-waitlist",
+      "database_id": "3f18ef88-31db-44e6-b209-90361e347a22"
+    }
+  ],
   "assets": {
     "directory": "./.worker-dist",
     "binding": "ASSETS",

@@ -7,6 +7,8 @@
     "dev": "vite --port=3000 --host=0.0.0.0",
     "build": "vite build",
     "prepare:worker-assets": "node scripts/prepare-worker-assets.mjs",
+    "db:migrate:remote": "npx wrangler d1 execute taptile-waitlist --remote --file=migrations/0001_create_waitlist_submissions.sql",
+    "db:list:remote": "npx wrangler d1 execute taptile-waitlist --remote --command \"SELECT id, email, business_name, city, pos_software, source, submitted_at, email_status FROM waitlist_submissions ORDER BY submitted_at DESC;\"",
     "deploy:worker": "npm run build && npm run prepare:worker-assets && npx wrangler deploy --config wrangler.jsonc",
     "start": "npm run build && node server.js",
     "preview": "vite preview",

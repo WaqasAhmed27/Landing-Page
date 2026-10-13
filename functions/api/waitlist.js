@@ -20,12 +20,40 @@ export async function onRequestPost(context) {
       });
     }
 
+    const submittedAt = new Date().toISOString();
+    const database = context.env.taptile_waitlist;
+    if (!database) {
+      console.error('Waitlist database binding is not configured.');
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'Waitlist service is temporarily unavailable.'
+      }), {
+        status: 503,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    const submission = await database.prepare(`
+      INSERT INTO waitlist_submissions
+        (email, business_name, city, pos_software, source, submitted_at)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).bind(
+      cleanEmail,
+      typeof businessName === 'string' ? businessName.trim() || null : null,
+      typeof city === 'string' ? city.trim() || null : null,
+      typeof posSoftware === 'string' ? posSoftware.trim() || null : null,
+      typeof source === 'string' ? source.trim() || 'website' : 'website',
+      submittedAt
+    ).run();
+
+    const submissionId = submission.meta.last_row_id;
+
     if (!resendApiKey) {
       console.warn('RESEND_API_KEY is not configured in Cloudflare environment.');
-      // Return 200 with fallback indicator so client knows submission is safe
       return new Response(JSON.stringify({ 
         success: true, 
-        message: 'Waitlist signup received (unconfigured mailer).',
+        message: 'Waitlist signup recorded. Email notification is temporarily unavailable.',
+        submissionId,
         email: cleanEmail 
       }), {
         status: 200,
@@ -83,9 +111,16 @@ export async function onRequestPost(context) {
       throw new Error(`Resend API error: ${JSON.stringify(errorData)}`);
     }
 
+    await database.prepare(`
+      UPDATE waitlist_submissions
+      SET email_status = 'sent'
+      WHERE id = ?
+    `).bind(submissionId).run();
+
     return new Response(JSON.stringify({ 
       success: true, 
       message: 'Successfully added to waitlist.',
+      submissionId,
       email: cleanEmail
     }), {
       status: 200,
