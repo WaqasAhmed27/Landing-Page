@@ -53,6 +53,8 @@ This will generate an optimized bundle in the `dist` folder. To preview the prod
 npm run preview
 ```
 
+Cloudflare Pages serves the homepage discovery headers from `public/_headers`. The production response for `/` advertises the API catalog, OpenAPI service description, service documentation, and machine-readable description using RFC 8288/RFC 9727 relation types.
+
 ## 🌍 About TapTile
 
 TapTile intercepts standard ESC/POS print jobs from any billing software and generates a digital receipt in parallel. With a dedicated counter device, customers can simply tap their phone via NFC (or scan a QR code) to receive their receipt in under 2 seconds—no app required, no POS integration needed, completely offline-capable at the counter.

@@ -1,3 +1,6 @@
+/
+  Link: </.well-known/api-catalog>; rel="api-catalog", </openapi.json>; rel="service-desc"; type="application/json", </>; rel="service-doc"; type="text/html", </openapi.json>; rel="describedby"; type="application/json"
+
 /*
   Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
   X-Frame-Options: SAMEORIGIN
