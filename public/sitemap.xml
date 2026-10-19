@@ -7,7 +7,7 @@
   <!-- Primary Landing Page -->
   <url>
     <loc>https://taptile.pk/</loc>
-    <lastmod>2026-08-06</lastmod>
+    <lastmod>2026-10-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
@@ -40,6 +40,21 @@
   <url>
     <loc>https://taptile.pk/paperless-checkout</loc>
     <lastmod>2026-08-06</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Blog -->
+  <url>
+    <loc>https://taptile.pk/blog</loc>
+    <lastmod>2026-10-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://taptile.pk/blog/pra-handwritten-receipt-ban-eims-guide</loc>
+    <lastmod>2026-10-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>

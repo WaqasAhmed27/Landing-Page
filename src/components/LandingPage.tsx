@@ -306,10 +306,8 @@ export default function LandingPage() {
       });
     }
 
-    if (reducedMotion) {
-      gsap.set(".motion-reveal, .hiw-card", { clearProps: "all", autoAlpha: 1 });
-      return;
-    }
+    // Steps 1-3 are scroll-linked (they only move while the user scrolls), so they
+    // stay on under reduced motion. Self-running motion below the early return does not.
 
     // 1. Progress Bar (Desktop only)
     gsap.to(progressBarRef.current, {
@@ -342,7 +340,7 @@ export default function LandingPage() {
 
     // 3. Problem with Paper Cards (Desktop)
     const mm = gsap.matchMedia();
-    mm.add("(min-width: 768px) and (prefers-reduced-motion: no-preference)", () => {
+    mm.add("(min-width: 768px)", () => {
       const elements = [card1Ref.current, card2Ref.current, card3Ref.current, footerRef.current];
       const nums = [
         { ref: num1Ref, val: 41.5, unit: 'B', fmt: (v: number) => v.toFixed(1) },
@@ -402,13 +400,18 @@ export default function LandingPage() {
       });
     });
     
-    mm.add("(max-width: 767px) and (prefers-reduced-motion: no-preference)", () => {
+    mm.add("(max-width: 767px)", () => {
        const elements = [card1Ref.current, card2Ref.current, card3Ref.current, footerRef.current];
        elements.forEach(el => el && gsap.set(el, { clearProps: "all" }));
        if (num1Ref.current) num1Ref.current.textContent = '41.5B';
        if (num2Ref.current) num2Ref.current.textContent = '90%';
        if (num3Ref.current) num3Ref.current.textContent = '12.4M';
     });
+
+    if (reducedMotion) {
+      gsap.set(".motion-reveal, .hiw-card", { clearProps: "all", autoAlpha: 1 });
+      return;
+    }
 
     // 4. How It Works Snap
     const cards = gsap.utils.toArray('.hiw-card', howItWorksRef.current) as HTMLElement[];
@@ -759,7 +762,7 @@ export default function LandingPage() {
             A smarter little after-checkout ritual
           </div>
           <h1 className="motion-reveal landing-title font-syne text-[2.25rem] sm:text-[3rem] lg:text-[3.5rem] font-extrabold leading-[1] tracking-tight mb-8 relative z-10">
-            Digital receipts.<br />
+            Digital receipts for Pakistan.<br />
             <span className="text-[#4ADE80] relative inline-block">
               Zero POS changes.
               <div className="chalk-circle motion-chalk-circle -z-10" aria-hidden="true"></div>
@@ -1382,11 +1385,10 @@ export default function LandingPage() {
                   {faqOpen === i ? '-' : '+'}
                 </span>
               </button>
-              {faqOpen === i && (
-                <div id={`faq-answer-${i}`} role="region" aria-labelledby={`faq-question-${i}`} className="px-4 pb-4 sm:px-8 sm:pb-6 text-gray-700 font-medium border-t-2 border-gray-100 pt-4 text-sm sm:text-lg">
-                  {faq.a}
-                </div>
-              )}
+              {/* Always in the DOM so crawlers can read the answer; `hidden` collapses it visually. */}
+              <div id={`faq-answer-${i}`} role="region" aria-labelledby={`faq-question-${i}`} hidden={faqOpen !== i} className="px-4 pb-4 sm:px-8 sm:pb-6 text-gray-700 font-medium border-t-2 border-gray-100 pt-4 text-sm sm:text-lg">
+                {faq.a}
+              </div>
             </div>
           ))}
         </div>
@@ -1623,13 +1625,15 @@ export default function LandingPage() {
             <a href="#pricing" onClick={(e) => { e.preventDefault(); scrollToSection('pricing'); }} className="hover:text-[#4ADE80] transition-colors">Pricing</a>
           </div>
           <div className="flex flex-wrap justify-center gap-6 font-bold text-xs uppercase tracking-wider text-gray-500 mt-6 md:mt-0">
-            <a href="/digital-receipts.html" className="hover:text-[#4ADE80] transition-colors">Digital Receipts</a>
+            <a href="/digital-receipts" className="hover:text-[#4ADE80] transition-colors">Digital Receipts</a>
             <span>·</span>
-            <a href="/fbr-fiscalization.html" className="hover:text-[#4ADE80] transition-colors">FBR Fiscalization</a>
+            <a href="/fbr-fiscalization" className="hover:text-[#4ADE80] transition-colors">FBR Fiscalization</a>
             <span>·</span>
-            <a href="/paperless-checkout.html" className="hover:text-[#4ADE80] transition-colors">Paperless ROI</a>
+            <a href="/paperless-checkout" className="hover:text-[#4ADE80] transition-colors">Paperless ROI</a>
             <span>·</span>
-            <a href="/nfc-pos-intercept.html" className="hover:text-[#4ADE80] transition-colors">NFC Architecture</a>
+            <a href="/nfc-pos-intercept" className="hover:text-[#4ADE80] transition-colors">NFC Architecture</a>
+            <span>·</span>
+            <a href="/blog" className="hover:text-[#4ADE80] transition-colors">Blog</a>
           </div>
           <div className="font-mono text-xs font-bold text-gray-500 uppercase tracking-widest">
             © 2026 · Karachi, Pakistan
