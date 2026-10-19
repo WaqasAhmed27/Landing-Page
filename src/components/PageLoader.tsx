@@ -11,10 +11,6 @@ export default function PageLoader() {
     if (!containerRef.current) return;
 
     previousOverflowRef.current = document.body.style.overflow;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setIsComplete(true);
-      return;
-    }
     
     const panels = gsap.utils.toArray('.shutter-panel', containerRef.current);
     
@@ -51,7 +47,9 @@ export default function PageLoader() {
   if (isComplete) return null;
 
   return (
-    <div ref={containerRef} className="fixed inset-0 z-[999999] flex pointer-events-none bg-transparent">
+    // Hidden unless index.html marked <html class="js">, so the pre-rendered page isn't
+    // covered by a loader that would never lift when JavaScript doesn't run.
+    <div ref={containerRef} className="fixed inset-0 z-[999999] hidden [.js_&]:flex pointer-events-none bg-transparent">
       {Array(8).fill(0).map((_, i) => (
         <div 
           key={i} 

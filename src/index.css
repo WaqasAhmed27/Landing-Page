@@ -550,36 +550,6 @@ select:focus-visible {
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    scroll-behavior: auto !important;
-    transition-duration: 0.01ms !important;
-  }
-
-  .motion-scrub-line {
-    transform: none;
-  }
-
-  .motion-chalk-circle {
-    transform: scaleX(var(--chalk-circle-x-scale)) scale(var(--chalk-circle-scale)) rotate(-3deg);
-  }
-
-  .hero-receipt,
-  .hero-phone,
-  .hero-nfc {
-    animation: none;
-  }
-
-  .hero-flow-dots span,
-  .hero-flow-label {
-    animation: none;
-  }
-}
-
 @media (min-width: 1024px) {
   html {
     font-size: 14.4px;

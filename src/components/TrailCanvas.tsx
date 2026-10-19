@@ -55,7 +55,7 @@ export default function TrailCanvas() {
   };
 
   useEffect(() => {
-    if (!window.matchMedia("(pointer: fine) and (prefers-reduced-motion: no-preference)").matches) return;
+    if (!window.matchMedia("(pointer: fine)").matches) return;
 
     const handleGlobalMove = (clientX: number, clientY: number) => {
       const dist = Math.hypot(clientX - lastMousePos.current.x, clientY - lastMousePos.current.y);

@@ -259,57 +259,48 @@ export default function LandingPage() {
   const innerContainerRef = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const revealItems = gsap.utils.toArray<HTMLElement>(".motion-reveal");
+    revealItems.forEach((item, index) => {
+      gsap.fromTo(item,
+        { autoAlpha: 0, y: 26 },
+        {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.7,
+          delay: Math.min(index * 0.04, 0.24),
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: item,
+            start: "top 88%",
+            once: true,
+          },
+        }
+      );
+    });
 
-    if (!reducedMotion) {
-      const revealItems = gsap.utils.toArray<HTMLElement>(".motion-reveal");
-      revealItems.forEach((item, index) => {
-        gsap.fromTo(item,
-          { autoAlpha: 0, y: 26 },
-          {
-            autoAlpha: 1,
-            y: 0,
-            duration: 0.7,
-            delay: Math.min(index * 0.04, 0.24),
-            ease: "power3.out",
-            scrollTrigger: {
-              trigger: item,
-              start: "top 88%",
-              once: true,
-            },
-          }
-        );
-      });
+    gsap.to(".landing-hero-art", {
+      yPercent: -5,
+      rotate: 1,
+      ease: "none",
+      scrollTrigger: {
+        trigger: ".landing-hero",
+        start: "top top",
+        end: "bottom top",
+        scrub: 1,
+      },
+    });
 
-      gsap.to(".landing-hero-art", {
-        yPercent: -5,
-        rotate: 1,
-        ease: "none",
-        scrollTrigger: {
-          trigger: ".landing-hero",
-          start: "top top",
-          end: "bottom top",
-          scrub: 1,
-        },
-      });
-
-      gsap.to(".motion-scrub-line", {
-        scaleX: 1,
-        transformOrigin: "left center",
-        ease: "none",
-        scrollTrigger: {
-          trigger: ".motion-scrub-line",
-          start: "top 90%",
-          end: "top 55%",
-          scrub: true,
-        },
-      });
-    }
-
-    if (reducedMotion) {
-      gsap.set(".motion-reveal, .hiw-card", { clearProps: "all", autoAlpha: 1 });
-      return;
-    }
+    gsap.to(".motion-scrub-line", {
+      scaleX: 1,
+      transformOrigin: "left center",
+      ease: "none",
+      scrollTrigger: {
+        trigger: ".motion-scrub-line",
+        start: "top 90%",
+        end: "top 55%",
+        scrub: true,
+      },
+    });
 
     // 1. Progress Bar (Desktop only)
     gsap.to(progressBarRef.current, {
@@ -342,7 +333,7 @@ export default function LandingPage() {
 
     // 3. Problem with Paper Cards (Desktop)
     const mm = gsap.matchMedia();
-    mm.add("(min-width: 768px) and (prefers-reduced-motion: no-preference)", () => {
+    mm.add("(min-width: 768px)", () => {
       const elements = [card1Ref.current, card2Ref.current, card3Ref.current, footerRef.current];
       const nums = [
         { ref: num1Ref, val: 41.5, unit: 'B', fmt: (v: number) => v.toFixed(1) },
@@ -402,7 +393,7 @@ export default function LandingPage() {
       });
     });
     
-    mm.add("(max-width: 767px) and (prefers-reduced-motion: no-preference)", () => {
+    mm.add("(max-width: 767px)", () => {
        const elements = [card1Ref.current, card2Ref.current, card3Ref.current, footerRef.current];
        elements.forEach(el => el && gsap.set(el, { clearProps: "all" }));
        if (num1Ref.current) num1Ref.current.textContent = '41.5B';
@@ -484,7 +475,7 @@ export default function LandingPage() {
     // 7. Cursor Blob Follower & Liquid Deformation
     const blob = blobRef.current;
     const blobEffect = blobEffectRef.current;
-    if (blob && blobEffect && window.matchMedia("(pointer: fine) and (prefers-reduced-motion: no-preference)").matches) {
+    if (blob && blobEffect && window.matchMedia("(pointer: fine)").matches) {
       const xTo = gsap.quickTo(blob, "left", { duration: 0.4, ease: "power3" });
       const yTo = gsap.quickTo(blob, "top", { duration: 0.4, ease: "power3" });
 
@@ -600,7 +591,8 @@ export default function LandingPage() {
   const water = Math.round(calcVolume * 0.364);
   const paper = Math.round(calcVolume * 0.018);
   const trees = (calcVolume * 0.043).toFixed(1);
-  const expenses = Math.round(calcVolume * 18.25).toLocaleString();
+  // Fixed locale so the pre-rendered HTML matches the visitor's browser during hydration.
+  const expenses = Math.round(calcVolume * 18.25).toLocaleString("en-US");
 
   const faqs = [
     { q: "Does this require changes to our POS software?", a: "No. TapTile installs alongside your current system — your printer keeps working exactly as before. It runs independently without touching your billing software. If TapTile ever goes offline, your paper receipts continue uninterrupted. Zero risk to your operations." },
@@ -759,7 +751,7 @@ export default function LandingPage() {
             A smarter little after-checkout ritual
           </div>
           <h1 className="motion-reveal landing-title font-syne text-[2.25rem] sm:text-[3rem] lg:text-[3.5rem] font-extrabold leading-[1] tracking-tight mb-8 relative z-10">
-            Digital receipts.<br />
+            Digital receipts for Pakistan.<br />
             <span className="text-[#4ADE80] relative inline-block">
               Zero POS changes.
               <div className="chalk-circle motion-chalk-circle -z-10" aria-hidden="true"></div>
@@ -1382,11 +1374,10 @@ export default function LandingPage() {
                   {faqOpen === i ? '-' : '+'}
                 </span>
               </button>
-              {faqOpen === i && (
-                <div id={`faq-answer-${i}`} role="region" aria-labelledby={`faq-question-${i}`} className="px-4 pb-4 sm:px-8 sm:pb-6 text-gray-700 font-medium border-t-2 border-gray-100 pt-4 text-sm sm:text-lg">
-                  {faq.a}
-                </div>
-              )}
+              {/* Always in the DOM so crawlers can read the answer; `hidden` collapses it visually. */}
+              <div id={`faq-answer-${i}`} role="region" aria-labelledby={`faq-question-${i}`} hidden={faqOpen !== i} className="px-4 pb-4 sm:px-8 sm:pb-6 text-gray-700 font-medium border-t-2 border-gray-100 pt-4 text-sm sm:text-lg">
+                {faq.a}
+              </div>
             </div>
           ))}
         </div>
@@ -1623,13 +1614,15 @@ export default function LandingPage() {
             <a href="#pricing" onClick={(e) => { e.preventDefault(); scrollToSection('pricing'); }} className="hover:text-[#4ADE80] transition-colors">Pricing</a>
           </div>
           <div className="flex flex-wrap justify-center gap-6 font-bold text-xs uppercase tracking-wider text-gray-500 mt-6 md:mt-0">
-            <a href="/digital-receipts.html" className="hover:text-[#4ADE80] transition-colors">Digital Receipts</a>
+            <a href="/digital-receipts" className="hover:text-[#4ADE80] transition-colors">Digital Receipts</a>
             <span>·</span>
-            <a href="/fbr-fiscalization.html" className="hover:text-[#4ADE80] transition-colors">FBR Fiscalization</a>
+            <a href="/fbr-fiscalization" className="hover:text-[#4ADE80] transition-colors">FBR Fiscalization</a>
             <span>·</span>
-            <a href="/paperless-checkout.html" className="hover:text-[#4ADE80] transition-colors">Paperless ROI</a>
+            <a href="/paperless-checkout" className="hover:text-[#4ADE80] transition-colors">Paperless ROI</a>
             <span>·</span>
-            <a href="/nfc-pos-intercept.html" className="hover:text-[#4ADE80] transition-colors">NFC Architecture</a>
+            <a href="/nfc-pos-intercept" className="hover:text-[#4ADE80] transition-colors">NFC Architecture</a>
+            <span>·</span>
+            <a href="/blog" className="hover:text-[#4ADE80] transition-colors">Blog</a>
           </div>
           <div className="font-mono text-xs font-bold text-gray-500 uppercase tracking-widest">
             © 2026 · Karachi, Pakistan

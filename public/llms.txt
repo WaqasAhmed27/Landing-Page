@@ -19,6 +19,8 @@ TapTile is a fintech infrastructure company based in Pakistan that provides:
 - [NFC POS Integration](https://taptile.pk/nfc-pos-intercept): Zero-code POS integration and hardware architecture explained.
 - [FBR Fiscalization Compliance](https://taptile.pk/fbr-fiscalization): FBR Tier-1 retailer compliance and automated digital invoice reporting.
 - [Paperless Checkout](https://taptile.pk/paperless-checkout): Eliminating thermal paper and calculating paper roll cost savings.
+- [TapTile Blog](https://taptile.pk/blog): Guides on digital receipts and PRA/FBR invoicing rules in Pakistan.
+- [Punjab Handwritten Receipt Ban: PRA EIMS Guide (2026)](https://taptile.pk/blog/pra-handwritten-receipt-ban-eims-guide): Who must issue PRA EIMS receipts, what a valid receipt shows, fines, the 8% card vs 16% cash tax rate, and how customers verify receipts.
 - [TapTile Merchant Portal](https://merchant.taptile.pk): Login dashboard for retail merchants to monitor transactions, manage branches, and view FBR compliance feeds.
 
 ## Company Information
