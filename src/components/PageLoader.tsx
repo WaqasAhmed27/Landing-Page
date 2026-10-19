@@ -11,10 +11,6 @@ export default function PageLoader() {
     if (!containerRef.current) return;
 
     previousOverflowRef.current = document.body.style.overflow;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setIsComplete(true);
-      return;
-    }
     
     const panels = gsap.utils.toArray('.shutter-panel', containerRef.current);
     

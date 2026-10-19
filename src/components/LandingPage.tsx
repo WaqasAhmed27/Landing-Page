@@ -259,55 +259,48 @@ export default function LandingPage() {
   const innerContainerRef = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const revealItems = gsap.utils.toArray<HTMLElement>(".motion-reveal");
+    revealItems.forEach((item, index) => {
+      gsap.fromTo(item,
+        { autoAlpha: 0, y: 26 },
+        {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.7,
+          delay: Math.min(index * 0.04, 0.24),
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: item,
+            start: "top 88%",
+            once: true,
+          },
+        }
+      );
+    });
 
-    if (!reducedMotion) {
-      const revealItems = gsap.utils.toArray<HTMLElement>(".motion-reveal");
-      revealItems.forEach((item, index) => {
-        gsap.fromTo(item,
-          { autoAlpha: 0, y: 26 },
-          {
-            autoAlpha: 1,
-            y: 0,
-            duration: 0.7,
-            delay: Math.min(index * 0.04, 0.24),
-            ease: "power3.out",
-            scrollTrigger: {
-              trigger: item,
-              start: "top 88%",
-              once: true,
-            },
-          }
-        );
-      });
+    gsap.to(".landing-hero-art", {
+      yPercent: -5,
+      rotate: 1,
+      ease: "none",
+      scrollTrigger: {
+        trigger: ".landing-hero",
+        start: "top top",
+        end: "bottom top",
+        scrub: 1,
+      },
+    });
 
-      gsap.to(".landing-hero-art", {
-        yPercent: -5,
-        rotate: 1,
-        ease: "none",
-        scrollTrigger: {
-          trigger: ".landing-hero",
-          start: "top top",
-          end: "bottom top",
-          scrub: 1,
-        },
-      });
-
-      gsap.to(".motion-scrub-line", {
-        scaleX: 1,
-        transformOrigin: "left center",
-        ease: "none",
-        scrollTrigger: {
-          trigger: ".motion-scrub-line",
-          start: "top 90%",
-          end: "top 55%",
-          scrub: true,
-        },
-      });
-    }
-
-    // Steps 1-3 are scroll-linked (they only move while the user scrolls), so they
-    // stay on under reduced motion. Self-running motion below the early return does not.
+    gsap.to(".motion-scrub-line", {
+      scaleX: 1,
+      transformOrigin: "left center",
+      ease: "none",
+      scrollTrigger: {
+        trigger: ".motion-scrub-line",
+        start: "top 90%",
+        end: "top 55%",
+        scrub: true,
+      },
+    });
 
     // 1. Progress Bar (Desktop only)
     gsap.to(progressBarRef.current, {
@@ -408,11 +401,6 @@ export default function LandingPage() {
        if (num3Ref.current) num3Ref.current.textContent = '12.4M';
     });
 
-    if (reducedMotion) {
-      gsap.set(".motion-reveal, .hiw-card", { clearProps: "all", autoAlpha: 1 });
-      return;
-    }
-
     // 4. How It Works Snap
     const cards = gsap.utils.toArray('.hiw-card', howItWorksRef.current) as HTMLElement[];
     
@@ -487,7 +475,7 @@ export default function LandingPage() {
     // 7. Cursor Blob Follower & Liquid Deformation
     const blob = blobRef.current;
     const blobEffect = blobEffectRef.current;
-    if (blob && blobEffect && window.matchMedia("(pointer: fine) and (prefers-reduced-motion: no-preference)").matches) {
+    if (blob && blobEffect && window.matchMedia("(pointer: fine)").matches) {
       const xTo = gsap.quickTo(blob, "left", { duration: 0.4, ease: "power3" });
       const yTo = gsap.quickTo(blob, "top", { duration: 0.4, ease: "power3" });
 
