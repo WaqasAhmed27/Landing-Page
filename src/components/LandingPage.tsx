@@ -603,7 +603,8 @@ export default function LandingPage() {
   const water = Math.round(calcVolume * 0.364);
   const paper = Math.round(calcVolume * 0.018);
   const trees = (calcVolume * 0.043).toFixed(1);
-  const expenses = Math.round(calcVolume * 18.25).toLocaleString();
+  // Fixed locale so the pre-rendered HTML matches the visitor's browser during hydration.
+  const expenses = Math.round(calcVolume * 18.25).toLocaleString("en-US");
 
   const faqs = [
     { q: "Does this require changes to our POS software?", a: "No. TapTile installs alongside your current system — your printer keeps working exactly as before. It runs independently without touching your billing software. If TapTile ever goes offline, your paper receipts continue uninterrupted. Zero risk to your operations." },

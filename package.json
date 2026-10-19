@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --port=3000 --host=0.0.0.0",
-    "build": "vite build && npm run prepare:worker-assets",
+    "build": "vite build && vite build --ssr src/entry-server.tsx --outDir dist-ssr && node scripts/prerender.mjs && npm run prepare:worker-assets",
     "prepare:worker-assets": "node scripts/prepare-worker-assets.mjs",
     "db:migrate:remote": "npx wrangler d1 execute taptile-waitlist --remote --file=migrations/0001_create_waitlist_submissions.sql",
     "db:list:remote": "npx wrangler d1 execute taptile-waitlist --remote --command \"SELECT id, email, business_name, city, pos_software, source, submitted_at, email_status FROM waitlist_submissions ORDER BY submitted_at DESC;\"",
@@ -13,7 +13,8 @@
     "start": "npm run build && node server.js",
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "og:image": "node scripts/generate-og-image.mjs"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
