@@ -676,3 +676,21 @@ input[type=range]::-moz-range-thumb {
   }
 }
 
+
+/* Feature wheel: --d is the wheel diameter; only its right half is on screen. */
+.feature-wheel {
+  /* Phones: the wheel's top half rises from the bottom edge. */
+  --d: clamp(300px, calc((100dvh - 520px) * 2), min(150vw, 560px));
+}
+
+@media (min-width: 768px) {
+  .feature-wheel {
+    --d: min(640px, calc(100dvh - 8rem));
+  }
+}
+
+@media (min-width: 1024px) {
+  .feature-wheel {
+    --d: clamp(640px, calc(100dvh - 2rem), 820px);
+  }
+}
