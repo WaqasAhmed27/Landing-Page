@@ -30,7 +30,7 @@ TapTile is a fintech infrastructure company based in Pakistan that provides:
 - **Founded:** 2026
 - **Sector:** Fintech / Retail POS Technology / Digital Receipts
 - **Target Market:** Pakistani retail chains, supermarkets, pharmacies, quick-service restaurants
-- **Contact:** contact@taptile.pk
+- **Contact:** hello@taptile.pk
 
 ## Technical Overview
 
