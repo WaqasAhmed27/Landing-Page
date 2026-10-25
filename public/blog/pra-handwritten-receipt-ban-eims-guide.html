@@ -10,7 +10,8 @@
     <meta name="author" content="TapTile" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <link rel="canonical" href="https://taptile.pk/blog/pra-handwritten-receipt-ban-eims-guide" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/favicon.png" />
+    <link rel="shortcut icon" href="/favicon.ico" />
 
     <!-- Open Graph -->
     <meta property="og:type" content="article" />
@@ -223,12 +224,6 @@
       }
       .link-card:hover { transform: translate(-3px,-3px); box-shadow: 9px 9px 0 #111; text-decoration: none; }
       .link-card span { color: #22C55E; font-size: 0.85rem; font-weight: 900; text-transform: uppercase; display: block; margin-bottom: 8px; letter-spacing: 0.1em; font-family: 'Syne', sans-serif; }
-      footer {
-        background: #111; color: white; padding: 60px 0;
-        border-top: 4px solid #111; text-align: center;
-      }
-      footer a { color: #4ADE80; text-decoration: underline; text-decoration-thickness: 2px; }
-      footer p { color: #ccc; margin-bottom: 12px; font-size: 1rem; }
       @media (max-width: 640px) {
         .stat-grid, .stat-row { grid-template-columns: 1fr; }
         .cta-section { padding: 40px 24px; }
@@ -251,6 +246,7 @@
       .sources li { font-size: 0.95rem; }
       .table-wrap { overflow-x: auto; }
     </style>
+    <link rel="stylesheet" href="/assets/site-footer.css" />
   </head>
   <body>
     <nav aria-label="Main navigation">
@@ -492,12 +488,27 @@
       </article>
     </main>
 
-    <footer>
-      <div class="container">
-        <p style="margin-bottom: 8px;">
-          <a href="/">TapTile</a>: digital receipts for Pakistan · <a href="/blog">Blog</a>
-        </p>
-        <p style="font-size: 0.85rem; color: #aaa;">© 2026 TapTile Technologies · Karachi, Pakistan · <a href="mailto:contact@taptile.pk">contact@taptile.pk</a></p>
+    <footer class="site-footer" aria-label="Site footer">
+      <div class="site-footer__inner">
+        <div class="site-footer__main">
+          <div class="site-footer__brand">
+            <a class="site-footer__brand-lockup" href="/" aria-label="TapTile home">
+              <span class="site-footer__brand-mark"><img src="/assets/taptile-icon.png" alt="" width="46" height="46" loading="lazy" /></span>
+              <img class="site-footer__wordmark" src="/assets/taptile-text.png" alt="TapTile" width="148" height="43" loading="lazy" />
+            </a>
+            <p class="site-footer__tagline">Pakistan’s digital receipt network for modern retail.</p>
+            <a class="site-footer__contact" href="mailto:hello@taptile.pk">hello@taptile.pk</a>
+          </div>
+          <nav class="site-footer__nav" aria-label="Footer navigation">
+            <div class="site-footer__group"><h2>Explore</h2><ul>
+              <li><a href="/#hero-waitlist">Waitlist</a></li><li><a href="/#platform">Platform</a></li><li><a href="/#integration">Integration</a></li><li><a href="/#security">Security</a></li><li><a href="/#pricing">Pricing</a></li>
+            </ul></div>
+            <div class="site-footer__group"><h2>Resources</h2><ul>
+              <li><a href="/digital-receipts">Digital receipts</a></li><li><a href="/fbr-fiscalization">FBR fiscalization</a></li><li><a href="/paperless-checkout">Paperless ROI</a></li><li><a href="/nfc-pos-intercept">NFC architecture</a></li><li><a href="/blog">Blog</a></li>
+            </ul></div>
+          </nav>
+        </div>
+        <div class="site-footer__bottom"><span>© 2026 TapTile Technologies</span><span aria-label="Made with love in Pakistan">Made with ♥ in Pakistan</span></div>
       </div>
     </footer>
   </body>

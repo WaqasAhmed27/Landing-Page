@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, RefObject } from "react";
-import { Check, Menu, X, Plus, Droplet, Recycle, Trees, ArrowRight, Smartphone, Nfc, QrCodeIcon } from "lucide-react";
+import { Check, Menu, X, Plus, Droplet, Recycle, Trees, ArrowRight, Smartphone, Nfc } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -8,6 +8,8 @@ import neobrutalistLogo from "../assets/images/taptile_logo_neobrutalist.webp";
 import TrailCanvas from "./TrailCanvas";
 import BrutalButton from "./BrutalButton";
 import PageLoader from "./PageLoader";
+import FeatureWheel from "./FeatureWheel";
+import SiteFooter from "./SiteFooter";
 
 gsap.registerPlugin(ScrollTrigger);
 import imgGlasses from "../assets/images/trail_images/chameleon_glasses.webp";
@@ -24,6 +26,58 @@ const Pill = ({ text, colorClass }: { text: string, colorClass: string }) => (
   <div className={`landing-pill inline-block border-2 border-black px-5 py-2 rounded-full shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] font-bold text-xs uppercase tracking-wider ${colorClass}`}>
     {text}
   </div>
+);
+
+type PricingTier = {
+  name: string;
+  headerClass: string;
+  price: string;
+  note?: string;
+  features: string[];
+  footnote: string;
+};
+
+const PRICING_TIERS: PricingTier[] = [
+  {
+    name: "Starter",
+    headerClass: "bg-[#4ADE80] text-black",
+    price: "1,000",
+    note: "Up to 1,000 receipts",
+    features: ["Digital NFC + QR receipts", "Real-time dashboard", "48-hour installation", "Default receipt style"],
+    footnote: "PKR 5,000 refundable deposit",
+  },
+  {
+    name: "Pulse",
+    headerClass: "bg-[#FFF248] text-black",
+    price: "4,999",
+    features: ["Everything in Starter", "90-day analytics history", "Peak hours heatmap & top 10 SKUs", "Measure repeat customer rate", "1-click accountant export", "Same-day support"],
+    footnote: "Up to 2 locations / counters",
+  },
+  {
+    name: "Intelligence",
+    headerClass: "bg-[#f97316] text-black",
+    price: "12,999",
+    features: ["Everything in Pulse", "Automatic VIP & regular customer lists", "Smart product bundles", "Track real promo revenue", "Cashier void & fraud alerts", "4-hour priority VIP support"],
+    footnote: "Up to 5 locations / counters",
+  },
+];
+
+const COMMAND_FEATURES = [
+  "Everything in Intelligence",
+  "Cross-branch shopper tracking",
+  "Built for multi-till supermarkets",
+  "Direct ERP & warehouse integration",
+  "Dedicated account manager",
+  "Custom store branding",
+];
+
+const TierFeature: React.FC<{ text: string }> = ({ text }) => (
+  <li className="flex items-start gap-3">
+    <span className="mt-0.5 shrink-0 w-6 h-6 rounded-full bg-[#4ADE80] border-2 border-black flex items-center justify-center">
+      <Check size={14} strokeWidth={3} />
+    </span>
+    <span className="font-medium text-gray-800">{text}</span>
+  </li>
 );
 
 export default function LandingPage() {
@@ -959,7 +1013,7 @@ export default function LandingPage() {
                 <div className="w-10 h-10 md:w-14 md:h-14 rounded-full border-4 border-[#ef4444] text-[#ef4444] flex items-center justify-center mb-3 md:mb-6">
                   <Droplet size={20} className="md:w-7 md:h-7" strokeWidth={3} />
                 </div>
-                <h3 ref={num1Ref} className="font-syne text-3xl md:text-4xl font-extrabold text-[#ef4444] mb-2 md:mb-3">
+                <h3 ref={num1Ref} className="font-syne text-3xl lg:text-4xl font-extrabold text-[#ef4444] mb-2 md:mb-3">
                   41.5B
                 </h3>
                 <p className="font-bold text-base sm:text-lg md:text-xl mb-2 md:mb-4">Gallons of water</p>
@@ -979,7 +1033,7 @@ export default function LandingPage() {
                 <div className="w-10 h-10 md:w-14 md:h-14 rounded-full border-4 border-[#f97316] text-[#f97316] flex items-center justify-center mb-3 md:mb-6">
                   <Recycle size={20} className="md:w-7 md:h-7" strokeWidth={3} />
                 </div>
-                <h3 ref={num2Ref} className="font-syne text-3xl md:text-4xl font-extrabold text-[#f97316] mb-2 md:mb-3">
+                <h3 ref={num2Ref} className="font-syne text-3xl lg:text-4xl font-extrabold text-[#f97316] mb-2 md:mb-3">
                   90%
                 </h3>
                 <p className="font-bold text-base sm:text-lg md:text-xl mb-2 md:mb-4">Directly into landfill</p>
@@ -999,7 +1053,7 @@ export default function LandingPage() {
                 <div className="w-10 h-10 md:w-14 md:h-14 rounded-full border-4 border-[#4ADE80] text-[#4ADE80] flex items-center justify-center mb-3 md:mb-6">
                   <Trees size={20} className="md:w-7 md:h-7" strokeWidth={3} />
                 </div>
-                <h3 ref={num3Ref} className="font-syne text-3xl md:text-4xl font-extrabold text-[#4ADE80] mb-2 md:mb-3">
+                <h3 ref={num3Ref} className="font-syne text-3xl lg:text-4xl font-extrabold text-[#4ADE80] mb-2 md:mb-3">
                   12.4M
                 </h3>
                 <p className="font-bold text-base sm:text-lg md:text-xl mb-2 md:mb-4">Trees per year</p>
@@ -1037,7 +1091,7 @@ export default function LandingPage() {
             <div className="inline-block bg-white border-2 border-black text-black px-3 py-1 rounded-full font-bold text-xs uppercase tracking-wider mb-6">
               Step 01
             </div>
-            <h3 className="font-syne text-2xl lg:text-xl min-[1200px]:text-2xl xl:text-3xl font-extrabold mb-4 break-normal">Purchase made.</h3>
+            <h3 className="font-syne text-2xl lg:text-xl min-[1200px]:text-2xl min-[1600px]:text-3xl font-extrabold mb-4 break-normal">Purchase made.</h3>
             <p className="text-sm sm:text-base xl:text-lg font-medium text-gray-800">Customer pays as usual - cash, card, JazzCash, Raast, or Easypaisa. The cashier presses Print exactly as always.</p>
           </div>
 
@@ -1045,7 +1099,7 @@ export default function LandingPage() {
             <div className="inline-block bg-white border-2 border-black text-black px-3 py-1 rounded-full font-bold text-xs uppercase tracking-wider mb-6">
               Step 02
             </div>
-            <h3 className="font-syne text-2xl lg:text-xl min-[1200px]:text-2xl xl:text-3xl font-extrabold mb-4 break-normal">Intercept instantly.</h3>
+            <h3 className="font-syne text-2xl lg:text-xl min-[1200px]:text-2xl min-[1600px]:text-3xl font-extrabold mb-4 break-normal">Intercept instantly.</h3>
             <p className="text-sm sm:text-base xl:text-lg font-medium text-gray-800">The moment your printer fires, TapTile creates the digital version automatically. Paper prints as usual — nothing changes at the counter.</p>
           </div>
 
@@ -1053,7 +1107,7 @@ export default function LandingPage() {
             <div className="inline-block bg-white border-2 border-black text-black px-3 py-1 rounded-full font-bold text-xs uppercase tracking-wider mb-6">
               Step 03
             </div>
-            <h3 className="font-syne text-2xl lg:text-xl min-[1200px]:text-2xl xl:text-3xl font-extrabold mb-4 break-normal">Counter device fires.</h3>
+            <h3 className="font-syne text-2xl lg:text-xl min-[1200px]:text-2xl min-[1600px]:text-3xl font-extrabold mb-4 break-normal">Counter device fires.</h3>
             <p className="text-sm sm:text-base xl:text-lg font-medium text-gray-800">The counter device displays a QR code and activates NFC — ready for the customer to collect their receipt, even fully offline.</p>
           </div>
 
@@ -1061,7 +1115,7 @@ export default function LandingPage() {
             <div className="inline-block bg-[#111111] border-2 border-black text-[#22C55E] px-3 py-1 rounded-full font-bold text-xs uppercase tracking-wider mb-6">
               Step 04
             </div>
-            <h3 className="font-syne text-2xl lg:text-xl min-[1200px]:text-2xl xl:text-3xl font-extrabold mb-4 text-[#111111] break-normal">Customer taps. Done.</h3>
+            <h3 className="font-syne text-2xl lg:text-xl min-[1200px]:text-2xl min-[1600px]:text-3xl font-extrabold mb-4 text-[#111111] break-normal">Customer taps. Done.</h3>
             <p className="text-sm sm:text-base xl:text-lg font-medium text-[#111111]">One tap opens the receipt in the browser. No app, no account, no friction. Searchable and stored forever.</p>
           </div>
         </div>
@@ -1174,7 +1228,7 @@ export default function LandingPage() {
       </section>
 
       {/* Interactive Calculator */}
-      <section id="pricing" className="py-12 md:py-20 px-4 sm:px-6 md:px-8 lg:px-12 w-full bg-[#FDFBEE] relative">
+      <section id="savings" className="py-12 md:py-20 px-4 sm:px-6 md:px-8 lg:px-12 w-full bg-[#4ADE80] relative">
         <div className="absolute top-8 right-8 rotate-[8deg] z-20 xl:block hidden">
       <img src={imgSpark} alt="Spark icon - instant NFC receipt delivery" className="absolute -top-5 -left-4 w-10 h-10 -rotate-[20deg] object-contain pointer-events-none drop-shadow-md z-10" width={40} height={40} />
       <img src={imgConfetti} alt="Confetti - celebrating paperless retail in Pakistan" className="absolute -bottom-6 -right-6 w-12 h-12 rotate-[25deg] object-contain pointer-events-none drop-shadow-md z-10" width={48} height={48} />
@@ -1210,19 +1264,19 @@ export default function LandingPage() {
             <div className="grid grid-cols-2 gap-3 sm:gap-6">
               <div className="border-4 border-[#4ADE80] rounded-xl sm:rounded-2xl p-3 sm:p-6 bg-white shadow-[3px_3px_0px_0px_rgba(74,222,128,1)] sm:shadow-[4px_4px_0px_0px_rgba(74,222,128,1)]">
                 <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 mb-2 truncate">Water Preserved</p>
-                <p className="font-syne text-lg min-[360px]:text-xl min-[400px]:text-2xl sm:text-3xl font-extrabold text-[#4ADE80] break-words">{water} Gal</p>
+                <p className="font-syne text-base min-[360px]:text-lg min-[375px]:text-xl min-[400px]:text-2xl sm:text-3xl lg:text-2xl xl:text-3xl font-extrabold whitespace-nowrap text-[#4ADE80]">{water} <span className="font-mono text-xs sm:text-sm font-bold uppercase">Gal</span></p>
               </div>
               <div className="border-4 border-[#f97316] rounded-xl sm:rounded-2xl p-3 sm:p-6 bg-white shadow-[3px_3px_0px_0px_rgba(249,115,22,1)] sm:shadow-[4px_4px_0px_0px_rgba(249,115,22,1)]">
                 <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 mb-2 truncate">Paper Saved</p>
-                <p className="font-syne text-lg min-[360px]:text-xl min-[400px]:text-2xl sm:text-3xl font-extrabold text-[#f97316] break-words">{paper} kg</p>
+                <p className="font-syne text-base min-[360px]:text-lg min-[375px]:text-xl min-[400px]:text-2xl sm:text-3xl lg:text-2xl xl:text-3xl font-extrabold whitespace-nowrap text-[#f97316]">{paper} <span className="font-mono text-xs sm:text-sm font-bold uppercase">kg</span></p>
               </div>
               <div className="border-4 border-black rounded-xl sm:rounded-2xl p-3 sm:p-6 bg-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] sm:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                 <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 mb-2 truncate">Trees Shielded</p>
-                <p className="font-syne text-lg min-[360px]:text-xl min-[400px]:text-2xl sm:text-3xl font-extrabold break-words">{trees}</p>
+                <p className="font-syne text-base min-[360px]:text-lg min-[375px]:text-xl min-[400px]:text-2xl sm:text-3xl lg:text-2xl xl:text-3xl font-extrabold whitespace-nowrap">{trees}</p>
               </div>
               <div className="border-4 border-[#4ADE80] rounded-xl sm:rounded-2xl p-3 sm:p-6 bg-white shadow-[3px_3px_0px_0px_rgba(74,222,128,1)] sm:shadow-[4px_4px_0px_0px_rgba(74,222,128,1)]">
                 <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 mb-2 truncate">Roll Expenses Saved</p>
-                <p className="font-syne text-lg min-[360px]:text-xl min-[400px]:text-2xl sm:text-3xl font-extrabold text-[#4ADE80] break-all">PKR {expenses}</p>
+                <p className="font-syne text-base min-[360px]:text-lg min-[375px]:text-xl min-[400px]:text-2xl sm:text-3xl lg:text-2xl xl:text-3xl font-extrabold whitespace-nowrap text-[#4ADE80]"><span className="block font-mono text-xs sm:text-sm font-bold uppercase">PKR</span>{expenses}</p>
               </div>
             </div>
           </div>
@@ -1230,82 +1284,70 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Built for everyone */}
-      <section className="py-12 md:py-20 px-4 sm:px-6 md:px-8 lg:px-12 w-full bg-[#FFF248] relative">
-        <div className="absolute top-[-1rem] left-[15%] rotate-[-4deg] z-10 xl:block hidden">
-      <img src={imgCoin} alt="Coin icon - save money by eliminating thermal paper receipts" className="absolute -bottom-5 -right-3 w-10 h-10 -rotate-12 object-contain pointer-events-none drop-shadow-md z-10" width={40} height={40} />
-      <div className="pill-box bg-white border-[2px] border-[#111111] shadow-[2px_2px_0px_0px_#111111] rounded-full px-4 py-1.5 font-sans font-[700] text-[11px] text-[#111111] whitespace-nowrap">
-        0 POS changes
-      </div>
-    </div>
+      {/* Pricing Tiers */}
+      <section id="pricing" className="py-12 md:py-20 px-4 sm:px-6 md:px-8 lg:px-12 w-full bg-[#FDFBEE] relative">
         <div className="max-w-[85rem] mx-auto">
-        <div className="bg-white border-4 border-black rounded-[3rem] p-6 md:p-10 shadow-[16px_16px_0px_0px_rgba(0,0,0,1)]">
-          <div className="mb-10">
-            <h2 className="font-syne text-3xl sm:text-4xl font-extrabold">Built for everyone.</h2>
+        <div className="text-center mb-12">
+          <div className="flex justify-center mb-6">
+            <Pill text="Pricing" colorClass="bg-[#4ADE80]" />
           </div>
+          <h2 className="font-syne text-3xl sm:text-4xl font-extrabold">Pick the plan that fits your counter.</h2>
+          <p className="text-lg font-medium text-gray-700 mt-4">Simple monthly pricing. Upgrade as your store grows.</p>
+        </div>
 
-          <h3 className="font-syne text-xl font-bold uppercase tracking-wider mb-6 flex items-center gap-3">
-            <span className="bg-[#4ADE80] border-2 border-black px-3 py-1 rounded-full text-xs">For Retailers</span>
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-            <div className="bg-white border-4 border-black rounded-2xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[6px] active:translate-y-[6px] active:shadow-none transition-all">
-              <div className="text-[#4ADE80] mb-4"><Check size={32} /></div>
-              <h3 className="font-syne text-2xl font-bold mb-3">Zero POS changes needed</h3>
-              <p className="text-gray-700 font-medium mb-6">Compatible with every billing system in Pakistan, including legacy setups and custom agents.</p>
-              <span className="font-bold border-b-2 border-black pb-1 hover:text-[#4ADE80] hover:border-[#4ADE80] transition-colors cursor-pointer">Learn more →</span>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mb-8">
+          {PRICING_TIERS.map((tier) => (
+            <div key={tier.name} className="motion-reveal bg-white border-4 border-black rounded-2xl p-6 sm:p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col">
+              <div className={`self-start border-2 border-black rounded-lg px-4 py-1.5 font-syne font-extrabold text-base sm:text-lg uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] ${tier.headerClass}`}>
+                {tier.name}
+              </div>
+              <div className="mt-6 mb-2 flex items-baseline gap-2 whitespace-nowrap">
+                <span className="font-mono text-sm font-bold text-gray-500">Rs</span>
+                <span className="font-syne text-4xl xl:text-5xl font-extrabold tracking-tight">{tier.price}</span>
+              </div>
+              <p className="font-mono text-[11px] font-bold uppercase tracking-wider text-gray-500">
+                Per month{tier.note && <> · {tier.note}</>}
+              </p>
+              <ul className="space-y-3 mt-6 mb-8 flex-1">
+                {tier.features.map((feature) => <TierFeature key={feature} text={feature} />)}
+              </ul>
+              <p className="font-mono text-[11px] font-bold uppercase tracking-wider text-gray-500 border-t-2 border-dashed border-black/20 pt-4 mb-6">{tier.footnote}</p>
+              <BrutalButton onClick={() => scrollToSection('contact')} className="w-full bg-black text-white font-bold px-6 py-3 rounded-xl border-2 border-black uppercase text-sm" baseShadow="4px 4px 0px 0px rgba(74,222,128,1)">
+                Get Started
+              </BrutalButton>
             </div>
-            <div className="bg-white border-4 border-black rounded-2xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[6px] active:translate-y-[6px] active:shadow-none transition-all">
-              <div className="text-[#4ADE80] mb-4"><Check size={32} /></div>
-              <h3 className="font-syne text-2xl font-bold mb-3">Cut thermal roll costs by 85%</h3>
-              <p className="text-gray-700 font-medium mb-6">Save PKR 270,000+ per branch per year while removing the operational mess of paper rolls.</p>
-              <span className="font-bold border-b-2 border-black pb-1 hover:text-[#4ADE80] hover:border-[#4ADE80] transition-colors cursor-pointer">Learn more →</span>
-            </div>
-            <div className="bg-white border-4 border-black rounded-2xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[6px] active:translate-y-[6px] active:shadow-none transition-all">
-              <div className="text-[#4ADE80] mb-4"><Check size={32} /></div>
-              <h3 className="font-syne text-2xl font-bold mb-3">Purchase analytics built in</h3>
-              <p className="text-gray-700 font-medium mb-6">Understand buying patterns across branches without asking customers to install another app.</p>
-              <span className="font-bold border-b-2 border-black pb-1 hover:text-[#4ADE80] hover:border-[#4ADE80] transition-colors cursor-pointer">Learn more →</span>
-            </div>
-            <div className="bg-white border-4 border-black rounded-2xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[6px] active:translate-y-[6px] active:shadow-none transition-all">
-              <div className="text-[#4ADE80] mb-4"><Check size={32} /></div>
-              <h3 className="font-syne text-2xl font-bold mb-3">Eco-Retailer certification</h3>
-              <p className="text-gray-700 font-medium mb-6">A verified badge for your store window, receipts, and digital customer touchpoints.</p>
-              <span className="font-bold border-b-2 border-black pb-1 hover:text-[#4ADE80] hover:border-[#4ADE80] transition-colors cursor-pointer">Learn more →</span>
-            </div>
-          </div>
+          ))}
+        </div>
 
-          <h3 className="font-syne text-xl font-bold uppercase tracking-wider mb-6 flex items-center gap-3">
-            <span className="bg-[#FFF248] border-2 border-black px-3 py-1 rounded-full text-xs">For Customers</span>
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white border-4 border-black rounded-2xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[6px] active:translate-y-[6px] active:shadow-none transition-all">
-              <div className="text-[#4ADE80] mb-4"><Check size={32} /></div>
-              <h3 className="font-syne text-2xl font-bold mb-3">Never Lost</h3>
-              <p className="text-gray-700 font-medium mb-6">All your receipts are permanently archived and searchable from any device.</p>
-              <span className="font-bold border-b-2 border-black pb-1 hover:text-[#4ADE80] hover:border-[#4ADE80] transition-colors cursor-pointer">Learn more →</span>
+        <div className="motion-reveal bg-white border-4 border-black rounded-2xl p-6 sm:p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-8 lg:gap-12 items-center">
+          <div>
+            <div className="inline-block bg-[#ef4444] text-white border-2 border-black rounded-lg px-4 py-1.5 font-syne font-extrabold text-lg uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              Command
             </div>
-            <div className="bg-white border-4 border-black rounded-2xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[6px] active:translate-y-[6px] active:shadow-none transition-all">
-              <div className="text-[#4ADE80] mb-4"><Check size={32} /></div>
-              <h3 className="font-syne text-2xl font-bold mb-3">Easy Returns</h3>
-              <p className="text-gray-700 font-medium mb-6">One-tap barcode access for seamless store returns - no digging through drawers.</p>
-              <span className="font-bold border-b-2 border-black pb-1 hover:text-[#4ADE80] hover:border-[#4ADE80] transition-colors cursor-pointer">Learn more →</span>
+            <p className="font-mono text-[11px] font-bold uppercase tracking-wider text-gray-500 mt-4">For multi-branch chains & supermarkets</p>
+            <div className="mt-4 flex items-baseline gap-2 flex-wrap">
+              <span className="font-mono text-sm font-bold text-gray-500">Rs</span>
+              <span className="font-syne text-4xl xl:text-5xl font-extrabold tracking-tight">8,000</span>
+              <span className="font-mono text-xs font-bold uppercase text-gray-500">/ month</span>
             </div>
-            <div className="bg-white border-4 border-black rounded-2xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[6px] active:translate-y-[6px] active:shadow-none transition-all">
-              <div className="text-[#4ADE80] mb-4"><Check size={32} /></div>
-              <h3 className="font-syne text-2xl font-bold mb-3">Expense Tracking</h3>
-              <p className="text-gray-700 font-medium mb-6">Auto-categorize your spending across stores. No manual entry, ever.</p>
-              <span className="font-bold border-b-2 border-black pb-1 hover:text-[#4ADE80] hover:border-[#4ADE80] transition-colors cursor-pointer">Learn more →</span>
+            <div className="mt-2 flex items-baseline gap-2 flex-wrap">
+              <Plus size={20} strokeWidth={3} className="text-[#ef4444] self-center" />
+              <span className="font-mono text-sm font-bold text-gray-500">Rs</span>
+              <span className="font-syne text-2xl sm:text-3xl font-extrabold tracking-tight">1,500</span>
+              <span className="font-mono text-xs font-bold uppercase text-gray-500">/ extra counter</span>
             </div>
-            <div className="bg-white border-4 border-black rounded-2xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[6px] active:translate-y-[6px] active:shadow-none transition-all">
-              <div className="text-[#4ADE80] mb-4"><Check size={32} /></div>
-              <h3 className="font-syne text-2xl font-bold mb-3">Loyalty</h3>
-              <p className="text-gray-700 font-medium mb-6">Integrated reward point tracking - your points, automatically, on every receipt.</p>
-              <span className="font-bold border-b-2 border-black pb-1 hover:text-[#4ADE80] hover:border-[#4ADE80] transition-colors cursor-pointer">Learn more →</span>
-            </div>
+            <BrutalButton onClick={() => scrollToSection('contact')} className="mt-8 w-full sm:w-auto bg-black text-white font-bold px-6 py-3 rounded-xl border-2 border-black uppercase text-sm" baseShadow="4px 4px 0px 0px rgba(239,68,68,1)">
+              Talk to Sales
+            </BrutalButton>
           </div>
+          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
+            {COMMAND_FEATURES.map((feature) => <TierFeature key={feature} text={feature} />)}
+          </ul>
         </div>
         </div>
       </section>
+
+      <FeatureWheel />
 
       {/* Security */}
       <section id="security" className="py-12 md:py-20 px-4 sm:px-6 md:px-8 lg:px-12 w-full bg-[#FDFBEE] relative">
@@ -1382,75 +1424,87 @@ export default function LandingPage() {
           ))}
         </div>
 
-        {/* AEO Answer Blocks - structured semantic HTML for Google Featured Snippets,
-            People Also Ask (PAA) boxes, and AI Overview citations.
-            These are always visible to crawlers (not JS-gated like the accordion above). */}
+        {/* Search-friendly answer blocks: the full Q&A stays in prerendered HTML,
+            while native disclosures keep the answers accessible on demand. */}
         <div className="mt-16 space-y-8" aria-label="Common questions about TapTile digital receipts">
           <h3 className="sr-only">Key Questions About TapTile</h3>
 
+          {/* These native disclosures keep answers in the prerendered HTML while letting visitors open them on demand. */}
           {/* AEO Block 1: What is TapTile? */}
-          <div
-            className="bg-white border-4 border-black rounded-2xl p-6 sm:p-8 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+          <details
+            className="group overflow-hidden bg-white border-4 border-black rounded-2xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
             itemScope
             itemType="https://schema.org/Question"
           >
-            <h3 className="font-syne font-extrabold text-xl sm:text-2xl mb-4" itemProp="name">
-              What is TapTile and how does it work for Pakistan retail stores?
-            </h3>
-            <div itemProp="acceptedAnswer" itemScope itemType="https://schema.org/Answer">
+            <summary className="flex list-none cursor-pointer items-center justify-between gap-4 p-6 sm:p-8 focus-visible:outline-4 focus-visible:outline-[#4ADE80] focus-visible:outline-offset-2 [&::-webkit-details-marker]:hidden">
+              <h3 className="font-syne font-extrabold text-xl sm:text-2xl" itemProp="name">
+                What is TapTile and how does it work for Pakistan retail stores?
+              </h3>
+              <span aria-hidden="true" className="shrink-0 font-syne text-3xl leading-none font-bold transition-transform group-open:rotate-45">+</span>
+            </summary>
+            <div className="border-t-2 border-gray-100 px-6 pb-6 pt-4 sm:px-8 sm:pb-8" itemProp="acceptedAnswer" itemScope itemType="https://schema.org/Answer">
               <p className="text-gray-700 font-medium leading-relaxed text-base sm:text-lg" itemProp="text">
                 <strong>TapTile</strong> is Pakistan's first zero-POS-change digital receipt network. A compact plug-and-play device sits at your counter and works alongside your existing printer — no software changes, no IT support needed. When a customer pays, the receipt is instantly delivered to their smartphone via NFC tap or QR scan in under two seconds, with no app download required. Paper receipts continue printing in parallel, so there is zero disruption to your checkout operations.
               </p>
             </div>
-          </div>
+          </details>
 
           {/* AEO Block 2: NFC POS Intercept */}
-          <div
-            className="bg-white border-4 border-black rounded-2xl p-6 sm:p-8 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+          <details
+            className="group overflow-hidden bg-white border-4 border-black rounded-2xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
             itemScope
             itemType="https://schema.org/Question"
           >
-            <h3 className="font-syne font-extrabold text-xl sm:text-2xl mb-4" itemProp="name">
-              How does TapTile deliver digital receipts without changing POS software?
-            </h3>
-            <div itemProp="acceptedAnswer" itemScope itemType="https://schema.org/Answer">
+            <summary className="flex list-none cursor-pointer items-center justify-between gap-4 p-6 sm:p-8 focus-visible:outline-4 focus-visible:outline-[#4ADE80] focus-visible:outline-offset-2 [&::-webkit-details-marker]:hidden">
+              <h3 className="font-syne font-extrabold text-xl sm:text-2xl" itemProp="name">
+                How does TapTile deliver digital receipts without changing POS software?
+              </h3>
+              <span aria-hidden="true" className="shrink-0 font-syne text-3xl leading-none font-bold transition-transform group-open:rotate-45">+</span>
+            </summary>
+            <div className="border-t-2 border-gray-100 px-6 pb-6 pt-4 sm:px-8 sm:pb-8" itemProp="acceptedAnswer" itemScope itemType="https://schema.org/Answer">
               <p className="text-gray-700 font-medium leading-relaxed text-base sm:text-lg" itemProp="text">
                 TapTile's counter device connects to your existing setup in minutes — no software installation, no driver changes, no IT ticket. Every time a receipt is generated, the device automatically creates a digital copy and makes it available to the customer via NFC tap or QR scan. The paper receipt still prints exactly as before, completely unaffected. The customer opens the itemized digital receipt instantly in their mobile browser — no app, no account, no friction.
               </p>
             </div>
-          </div>
+          </details>
 
           {/* AEO Block 3: FBR Fiscalization */}
-          <div
-            className="bg-white border-4 border-black rounded-2xl p-6 sm:p-8 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+          <details
+            className="group overflow-hidden bg-white border-4 border-black rounded-2xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
             itemScope
             itemType="https://schema.org/Question"
           >
-            <h3 className="font-syne font-extrabold text-xl sm:text-2xl mb-4" itemProp="name">
-              Is TapTile compliant with FBR fiscalization requirements in Pakistan?
-            </h3>
-            <div itemProp="acceptedAnswer" itemScope itemType="https://schema.org/Answer">
+            <summary className="flex list-none cursor-pointer items-center justify-between gap-4 p-6 sm:p-8 focus-visible:outline-4 focus-visible:outline-[#4ADE80] focus-visible:outline-offset-2 [&::-webkit-details-marker]:hidden">
+              <h3 className="font-syne font-extrabold text-xl sm:text-2xl" itemProp="name">
+                Is TapTile compliant with FBR fiscalization requirements in Pakistan?
+              </h3>
+              <span aria-hidden="true" className="shrink-0 font-syne text-3xl leading-none font-bold transition-transform group-open:rotate-45">+</span>
+            </summary>
+            <div className="border-t-2 border-gray-100 px-6 pb-6 pt-4 sm:px-8 sm:pb-8" itemProp="acceptedAnswer" itemScope itemType="https://schema.org/Answer">
               <p className="text-gray-700 font-medium leading-relaxed text-base sm:text-lg" itemProp="text">
                 Yes. TapTile is fully compliant with FBR (Federal Board of Revenue) Tier-1 retailer fiscalization rules in Pakistan. Every transaction automatically generates a verifiable FBR invoice number and QR code, and the fiscal record is securely transmitted to FBR in real time — while the digital receipt is delivered to the customer simultaneously. No separate FBR integration software is needed; TapTile handles it end-to-end.
               </p>
             </div>
-          </div>
+          </details>
 
           {/* AEO Block 4: Paperless Checkout ROI */}
-          <div
-            className="bg-white border-4 border-black rounded-2xl p-6 sm:p-8 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+          <details
+            className="group overflow-hidden bg-white border-4 border-black rounded-2xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
             itemScope
             itemType="https://schema.org/Question"
           >
-            <h3 className="font-syne font-extrabold text-xl sm:text-2xl mb-4" itemProp="name">
-              How much can a retail store save by switching to digital receipts with TapTile?
-            </h3>
-            <div itemProp="acceptedAnswer" itemScope itemType="https://schema.org/Answer">
+            <summary className="flex list-none cursor-pointer items-center justify-between gap-4 p-6 sm:p-8 focus-visible:outline-4 focus-visible:outline-[#4ADE80] focus-visible:outline-offset-2 [&::-webkit-details-marker]:hidden">
+              <h3 className="font-syne font-extrabold text-xl sm:text-2xl" itemProp="name">
+                How much can a retail store save by switching to digital receipts with TapTile?
+              </h3>
+              <span aria-hidden="true" className="shrink-0 font-syne text-3xl leading-none font-bold transition-transform group-open:rotate-45">+</span>
+            </summary>
+            <div className="border-t-2 border-gray-100 px-6 pb-6 pt-4 sm:px-8 sm:pb-8" itemProp="acceptedAnswer" itemScope itemType="https://schema.org/Answer">
               <p className="text-gray-700 font-medium leading-relaxed text-base sm:text-lg" itemProp="text">
                 A store processing 500 transactions per day spends approximately PKR 18 per receipt on thermal paper rolls - roughly PKR 3.3 million per year. TapTile eliminates 85% of paper receipt usage, saving around PKR 2.8 million annually per high-volume location. Additionally, each thermal receipt roll requires approximately 0.36 litres of water and generates chemical BPS/BPA waste. Going paperless with TapTile is both a cost and environmental win for Pakistani retailers.
               </p>
             </div>
-          </div>
+          </details>
         </div>
 
         </div>
@@ -1478,7 +1532,7 @@ export default function LandingPage() {
       </section>
 
       {/* Get in Touch & Footer */}
-      <section id="contact" className="pt-12 pb-20 md:pt-20 md:pb-32 px-4 sm:px-6 md:px-8 lg:px-12 w-full bg-[#FDFBEE] relative overflow-hidden">
+      <section id="contact" className="pt-12 pb-16 md:pt-20 md:pb-16 px-4 sm:px-6 md:px-8 lg:px-12 w-full bg-[#FDFBEE] relative overflow-hidden">
         <div className="max-w-[70.625rem] mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center mb-12">
           <div>
@@ -1585,7 +1639,7 @@ export default function LandingPage() {
                   <div className="flex justify-between"><span>Basmati Rice 5kg</span><span>1,850</span></div>
                   <div className="flex justify-between"><span>Full Cream Milk x4</span><span>1,160</span></div>
                 </div>
-                <div className="py-6 flex justify-between font-syne font-extrabold text-2xl">
+                <div className="py-6 flex justify-between gap-3 font-syne font-extrabold text-lg sm:text-2xl">
                   <span>TOTAL SAVED</span><span>5,978.7</span>
                 </div>
                 <div className="bg-[#dcfce7] border-4 border-black rounded-xl p-3 text-black font-extrabold text-sm uppercase text-center w-full flex items-center justify-center gap-2 mt-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
@@ -1595,41 +1649,10 @@ export default function LandingPage() {
           </div>
         </div>
 
-        <footer className="bg-[#111111] text-white py-12 px-4 sm:px-6 md:px-8 lg:px-12 flex flex-col md:flex-row justify-between items-center gap-6 mt-16 border-t-4 border-black absolute left-0 w-full">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 border-2 border-white bg-black text-white rounded-lg flex items-center justify-center shadow-[2px_2px_0px_0px_rgba(255,255,255,1)]">
-              <QrCodeIcon className="w-5 h-5" />
-            </div>
-            <span className="font-syne font-extrabold text-2xl tracking-tight">TapTile</span>
-          </div>
-          <div className="flex flex-wrap justify-center gap-6 font-bold text-sm uppercase tracking-wider text-gray-500">
-            <a href="#hero-waitlist" onClick={(e) => { e.preventDefault(); focusHeroWaitlist(); }} className="hover:text-[#4ADE80] transition-colors">Waitlist</a>
-            <span>·</span>
-            <a href="#platform" onClick={(e) => { e.preventDefault(); scrollToSection('platform'); }} className="hover:text-[#4ADE80] transition-colors">Platform</a>
-            <span>·</span>
-            <a href="#integration" onClick={(e) => { e.preventDefault(); scrollToSection('integration'); }} className="hover:text-[#4ADE80] transition-colors">Integration</a>
-            <span>·</span>
-            <a href="#security" onClick={(e) => { e.preventDefault(); scrollToSection('security'); }} className="hover:text-[#4ADE80] transition-colors">Security</a>
-            <span>·</span>
-            <a href="#pricing" onClick={(e) => { e.preventDefault(); scrollToSection('pricing'); }} className="hover:text-[#4ADE80] transition-colors">Pricing</a>
-          </div>
-          <div className="flex flex-wrap justify-center gap-6 font-bold text-xs uppercase tracking-wider text-gray-500 mt-6 md:mt-0">
-            <a href="/digital-receipts" className="hover:text-[#4ADE80] transition-colors">Digital Receipts</a>
-            <span>·</span>
-            <a href="/fbr-fiscalization" className="hover:text-[#4ADE80] transition-colors">FBR Fiscalization</a>
-            <span>·</span>
-            <a href="/paperless-checkout" className="hover:text-[#4ADE80] transition-colors">Paperless ROI</a>
-            <span>·</span>
-            <a href="/nfc-pos-intercept" className="hover:text-[#4ADE80] transition-colors">NFC Architecture</a>
-            <span>·</span>
-            <a href="/blog" className="hover:text-[#4ADE80] transition-colors">Blog</a>
-          </div>
-          <div className="font-mono text-xs font-bold text-gray-500 uppercase tracking-widest">
-            © 2026 · Karachi, Pakistan
-          </div>
-        </footer>
         </div>
       </section>
+
+      <SiteFooter />
 
     </div>
     </div>

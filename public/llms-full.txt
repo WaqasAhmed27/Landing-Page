@@ -44,7 +44,7 @@ Yes. TapTile is fully compliant with FBR Tier-1 retailer fiscalization requireme
 
 ## Pricing
 
-TapTile offers simple, transparent pricing for retail stores with zero upfront software overhaul costs. A free pilot is available for qualifying retailers. Contact contact@taptile.pk for multi-branch and enterprise chains.
+TapTile offers simple, transparent pricing for retail stores with zero upfront software overhaul costs. A free pilot is available for qualifying retailers. Contact hello@taptile.pk for multi-branch and enterprise chains.
 
 ---
 
@@ -68,6 +68,6 @@ Unlike SMS-based receipt services (which require phone number capture) or email 
 - **Name:** TapTile Technologies
 - **Location:** Karachi / Lahore, Pakistan
 - **Founded:** 2026
-- **Email:** contact@taptile.pk
+- **Email:** hello@taptile.pk
 - **Website:** https://taptile.pk
 - **Merchant Portal:** https://merchant.taptile.pk
